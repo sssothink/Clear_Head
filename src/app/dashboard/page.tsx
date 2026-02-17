@@ -1,24 +1,14 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server-client";
-import { redirect } from "next/navigation";
+import { getGoals } from "@/lib/db/goals";
+import GoalsClient from "./GoalsClient";
 
 const DashboardPage = async () => {
-	const supabase = await createSupabaseServerClient();
-
-	const {
-		data: { user },
-	} = await supabase.auth.getUser();
-
-	if (!user) {
-		redirect("/auth/login");
-	}
+	const goals = await getGoals();
 
 	return (
-		<>
-			<main className="p-6">
-				<h1 className="text-2xl font-bold">HELLO IN DASHBOARD</h1>
-				{user && <p>{user.email}</p>}
-			</main>
-		</>
+		<main className="p-6">
+			<h1 className="text-2xl font-bold">Your goals</h1>
+			<GoalsClient initialGoals={goals} />
+		</main>
 	);
 };
 
