@@ -24,7 +24,6 @@ export async function createGoalAction(title: string) {
 		console.error("Error creating goal:", error);
 		throw new Error("Failed to create goal");
 	}
-
 	revalidatePath("/dashboard");
 }
 
@@ -40,10 +39,42 @@ export async function toggleGoalStatusAction(id: string, status: GoalStatus) {
 		console.error("Error updating goal status:", error);
 		throw new Error("Failed to update goal status");
 	}
-
 	revalidatePath("/dashboard");
 }
 
-// export async function deleteGoal(id: string) {
-// 	const supabase = await createSupabaseServerClient();
-// }
+export async function deleteGoalAction(id: string) {
+	const supabase = await createSupabaseServerClient();
+
+	const { error } = await supabase.from("goals").delete().eq("id", id);
+
+	if (error) {
+		console.error("Error deleting goal:", error);
+		throw new Error("Failed to delete goal");
+	}
+	revalidatePath("/dashboard");
+}
+
+export async function updateGoalAction(
+	id: string,
+	title: string,
+	description: string,
+	due_date: string | null,
+) {
+	const supabase = await createSupabaseServerClient();
+
+	const { error } = await supabase
+		.from("goals")
+		.update({
+			title,
+			description,
+			due_date,
+		})
+		.eq("id", id);
+
+	if (error) {
+		console.error("Error updating goal:", error);
+		throw new Error("Failed to update goal");
+	}
+
+	revalidatePath("/dashboard");
+}
