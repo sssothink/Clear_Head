@@ -1,10 +1,10 @@
 "use server";
 
-import { GoalStatus } from "@/lib/db/types";
+import { GoalPeriod, GoalStatus } from "@/lib/db/types";
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 import { revalidatePath } from "next/cache";
 
-export async function createGoalAction(title: string) {
+export async function createGoalAction(title: string, period: GoalPeriod) {
 	const supabase = await createSupabaseServerClient();
 
 	const {
@@ -15,16 +15,23 @@ export async function createGoalAction(title: string) {
 		throw new Error("User not authenticated");
 	}
 
-	const { error } = await supabase.from("goals").insert({
-		title,
-		owner_id: user.id,
-	});
+	const { data, error } = await supabase
+		.from("goals")
+		.insert({
+			title,
+			period,
+			owner_id: user.id,
+		})
+		.select()
+		.single();
 
 	if (error) {
 		console.error("Error creating goal:", error);
 		throw new Error("Failed to create goal");
 	}
+
 	revalidatePath("/dashboard");
+	return data;
 }
 
 export async function toggleGoalStatusAction(id: string, status: GoalStatus) {

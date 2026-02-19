@@ -1,6 +1,6 @@
 "use client";
 
-import { Goal } from "@/lib/db/types";
+import { Goal, GoalPeriod } from "@/lib/db/types";
 import { useOptimistic, useTransition } from "react";
 import {
 	createGoalAction,
@@ -15,7 +15,8 @@ type OptymisticAction =
 	| { type: "add"; goal: Goal }
 	| { type: "update"; goal: Goal }
 	| { type: "delete"; id: string }
-	| { type: "edit"; goal: Goal };
+	| { type: "edit"; goal: Goal }
+	| { type: "replace"; tempId: string; realGoal: Goal };
 
 export default function GoalsClient({
 	initialGoals,
@@ -31,14 +32,15 @@ export default function GoalsClient({
 				case "add":
 					return [action.goal, ...state];
 
-				case "update":
+				case "replace":
 					return state.map((goal) =>
-						goal.id === action.goal.id ? action.goal : goal,
+						goal.id === action.tempId ? action.realGoal : goal,
 					);
 
 				case "delete":
 					return state.filter((goal) => goal.id !== action.id);
 
+				case "update":
 				case "edit":
 					return state.map((goal) =>
 						goal.id === action.goal.id ? action.goal : goal,
@@ -50,12 +52,13 @@ export default function GoalsClient({
 		},
 	);
 
-	const handleCreateGoal = (title: string) => {
+	const handleCreateGoal = (title: string, period: GoalPeriod) => {
 		const tempGoal: Goal = {
 			id: crypto.randomUUID(),
 			title,
 			description: "",
 			status: "todo",
+			period,
 			owner_id: "",
 			created_at: new Date().toISOString(),
 			due_date: null,
@@ -63,7 +66,19 @@ export default function GoalsClient({
 
 		startTransition(async () => {
 			updateOptimisticGoals({ type: "add", goal: tempGoal });
-			await createGoalAction(title);
+
+			try {
+				const realGoal = await createGoalAction(title, period);
+
+				updateOptimisticGoals({
+					type: "replace",
+					tempId: tempGoal.id,
+					realGoal,
+				});
+			} catch (error) {
+				updateOptimisticGoals({ type: "delete", id: tempGoal.id });
+				console.error("Error creating goal: ", error);
+			}
 		});
 	};
 
@@ -101,16 +116,37 @@ export default function GoalsClient({
 		});
 	};
 
+	const groupedGoals = optimisticGoals.reduce(
+		(acc, goal) => {
+			if (!acc[goal.period]) acc[goal.period] = [];
+			acc[goal.period].push(goal);
+			return acc;
+		},
+		{} as Record<GoalPeriod, Goal[]>,
+	);
+
 	return (
-		<div>
+		<div className="flex flex-col gap-6">
 			<CreateGoalForm onCreateGoal={handleCreateGoal} isPending={isPending} />
-			<GoalsList
-				goals={optimisticGoals}
-				onToggleGoalStatus={handleToggleGoalStatus}
-				onDeleteGoal={handleDeleteGoal}
-				onEditGoal={handleEditGoal}
-				isPending={isPending}
-			/>
+			{(["day", "week", "month", "year", "someday"] as GoalPeriod[]).map(
+				(period) => (
+					<div key={period} className="mb-6">
+						<h2 className="text-xl font-bold capitalize">{period}</h2>
+
+						{groupedGoals[period]?.length ? (
+							<GoalsList
+								goals={groupedGoals[period]}
+								onToggleGoalStatus={handleToggleGoalStatus}
+								onDeleteGoal={handleDeleteGoal}
+								onEditGoal={handleEditGoal}
+								isPending={isPending}
+							/>
+						) : (
+							<p className="text-gray-400">No goals</p>
+						)}
+					</div>
+				),
+			)}
 		</div>
 	);
 }
