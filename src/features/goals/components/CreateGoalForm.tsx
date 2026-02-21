@@ -5,10 +5,8 @@ import { GoalPeriod } from "@/lib/db/types";
 
 const CreateGoalForm = ({
 	onCreateGoal,
-	isPending,
 }: {
 	onCreateGoal: (title: string, period: GoalPeriod) => void;
-	isPending: boolean;
 }) => {
 	const [title, setTitle] = useState("");
 	const [period, setPeriod] = useState<GoalPeriod>("day");
@@ -43,12 +41,7 @@ const CreateGoalForm = ({
 				<option value="someday">Someday</option>
 			</select>
 
-			<button
-				className="px-5 py-1 border-2 w-fit cursor-pointer"
-				disabled={isPending}
-			>
-				add
-			</button>
+			<button className="px-5 py-1 border-2 w-fit cursor-pointer">add</button>
 		</form>
 	);
 };

@@ -8,13 +8,11 @@ const GoalsList = ({
 	onToggleGoalStatus,
 	onDeleteGoal,
 	onEditGoal,
-	isPending,
 }: {
 	goals: Goal[];
 	onToggleGoalStatus: (goal: Goal) => void;
-	onDeleteGoal: (id: string) => void;
-	onEditGoal: (goal: Goal, title: string) => void;
-	isPending: boolean;
+	onDeleteGoal: (goal: Goal) => void;
+	onEditGoal: (goal: Goal, updates: Partial<Goal>) => void;
 }) => {
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [editValue, setEditValue] = useState("");
@@ -27,7 +25,7 @@ const GoalsList = ({
 						<form
 							onSubmit={(e) => {
 								e.preventDefault();
-								onEditGoal(goal, editValue);
+								onEditGoal(goal, editValue as Partial<Goal>);
 								setEditingId(null);
 							}}
 						>
@@ -51,7 +49,6 @@ const GoalsList = ({
 								<button
 									className="cursor-pointer px-5 py-1 border-2"
 									onClick={() => onToggleGoalStatus(goal)}
-									disabled={isPending}
 								>
 									{goal.status === "todo" ? "Done" : "Undo"}
 								</button>
@@ -62,15 +59,13 @@ const GoalsList = ({
 										setEditingId(goal.id);
 										setEditValue(goal.title);
 									}}
-									disabled={isPending}
 								>
 									Edit
 								</button>
 
 								<button
 									className="cursor-pointer px-5 py-1 border-2 bg-red-500 text-white hover:bg-red-600"
-									onClick={() => onDeleteGoal(goal.id)}
-									disabled={isPending}
+									onClick={() => onDeleteGoal(goal)}
 								>
 									Delete
 								</button>

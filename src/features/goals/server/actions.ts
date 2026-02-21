@@ -34,19 +34,34 @@ export async function createGoalAction(title: string, period: GoalPeriod) {
 	return data;
 }
 
-export async function toggleGoalStatusAction(id: string, status: GoalStatus) {
+export async function toggleGoalStatusAction(id: string) {
 	const supabase = await createSupabaseServerClient();
 
-	const { error } = await supabase
+	const { data: existing, error: fetchError } = await supabase
 		.from("goals")
-		.update({ status })
-		.eq("id", id);
+		.select("status")
+		.eq("id", id)
+		.single();
+
+	if (fetchError) throw new Error("Goal not found");
+
+	const newStatus = existing.status === "todo" ? "done" : "todo";
+
+	const { data, error } = await supabase
+		.from("goals")
+		.update({ status: newStatus })
+		.eq("id", id)
+		.select()
+		.single();
 
 	if (error) {
 		console.error("Error updating goal status:", error);
 		throw new Error("Failed to update goal status");
 	}
+
 	revalidatePath("/dashboard");
+
+	return data;
 }
 
 export async function deleteGoalAction(id: string) {
@@ -58,25 +73,27 @@ export async function deleteGoalAction(id: string) {
 		console.error("Error deleting goal:", error);
 		throw new Error("Failed to delete goal");
 	}
+
 	revalidatePath("/dashboard");
+
+	return { success: true };
 }
 
-export async function updateGoalAction(
+export async function editGoalAction(
 	id: string,
-	title: string,
-	description: string,
-	due_date: string | null,
+	updates: {
+		title?: string;
+		description?: string;
+	},
 ) {
 	const supabase = await createSupabaseServerClient();
 
-	const { error } = await supabase
+	const { data, error } = await supabase
 		.from("goals")
-		.update({
-			title,
-			description,
-			due_date,
-		})
-		.eq("id", id);
+		.update(updates)
+		.eq("id", id)
+		.select()
+		.single();
 
 	if (error) {
 		console.error("Error updating goal:", error);
@@ -84,4 +101,6 @@ export async function updateGoalAction(
 	}
 
 	revalidatePath("/dashboard");
+
+	return data;
 }
