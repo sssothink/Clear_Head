@@ -28,8 +28,10 @@ export default function RootLayout({
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
-				<Header />
-				{children}
+				<div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black">
+					<Header />
+					{children}
+				</div>
 			</body>
 		</html>
 	);

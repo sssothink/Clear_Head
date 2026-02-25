@@ -1,9 +1,7 @@
-import { getGoals, GoalsClient } from "@/features/goals";
+import { redirect } from "next/navigation";
 
 const DashboardPage = async () => {
-	const goals = await getGoals();
-
-	return <GoalsClient initialGoals={goals} />;
+	redirect("/dashboard/day");
 };
 
 export default DashboardPage;

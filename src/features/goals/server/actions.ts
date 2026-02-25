@@ -1,106 +1,84 @@
 "use server";
 
-import { GoalPeriod, GoalStatus } from "@/lib/db/types";
+import { setGoalOccurrenceStatus } from "@/lib/goals/occurrence-service";
+import { getCurrentUser } from "@/lib/goals/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
-import { revalidatePath } from "next/cache";
+import { GoalStatus } from "../model/types";
 
-export async function createGoalAction(title: string, period: GoalPeriod) {
+export async function createDayGoalAction(
+	id: string,
+	data: {
+		title: string;
+		start_time: string;
+		end_time: string;
+		recurrence_type: "none" | "daily" | "weekly";
+		recurrence_days?: number[];
+	},
+) {
 	const supabase = await createSupabaseServerClient();
+	const user = await getCurrentUser();
 
-	const {
-		data: { user },
-	} = await supabase.auth.getUser();
-
-	if (!user) {
-		throw new Error("User not authenticated");
-	}
-
-	const { data, error } = await supabase
+	const { data: created, error } = await supabase
 		.from("goals")
 		.insert({
-			title,
-			period,
+			id,
 			owner_id: user.id,
+			...data,
+			start_date:
+				data.recurrence_type === "none"
+					? new Date().toISOString().split("T")[0]
+					: null,
 		})
-		.select()
+		.select("id")
 		.single();
 
 	if (error) {
-		console.error("Error creating goal:", error);
-		throw new Error("Failed to create goal");
+		console.error("SUPABASE INSERT ERROR:", error);
+		throw error;
 	}
 
-	revalidatePath("/dashboard");
-	return data;
+	return created;
 }
 
-export async function toggleGoalStatusAction(id: string) {
-	const supabase = await createSupabaseServerClient();
+export async function setGoalOccurrenceStatusAction(
+	goalId: string,
+	date: string,
+	status: GoalStatus,
+) {
+	const result = await setGoalOccurrenceStatus(goalId, date, status);
 
-	const { data: existing, error: fetchError } = await supabase
-		.from("goals")
-		.select("status")
-		.eq("id", id)
-		.single();
-
-	if (fetchError) throw new Error("Goal not found");
-
-	const newStatus = existing.status === "todo" ? "done" : "todo";
-
-	const { data, error } = await supabase
-		.from("goals")
-		.update({ status: newStatus })
-		.eq("id", id)
-		.select()
-		.single();
-
-	if (error) {
-		console.error("Error updating goal status:", error);
-		throw new Error("Failed to update goal status");
-	}
-
-	revalidatePath("/dashboard");
-
-	return data;
+	return result;
 }
 
 export async function deleteGoalAction(id: string) {
 	const supabase = await createSupabaseServerClient();
+	const user = await getCurrentUser();
 
-	const { error } = await supabase.from("goals").delete().eq("id", id);
+	const { error } = await supabase
+		.from("goals")
+		.update({ is_deleted: true })
+		.eq("id", id)
+		.eq("owner_id", user.id);
 
-	if (error) {
-		console.error("Error deleting goal:", error);
-		throw new Error("Failed to delete goal");
-	}
-
-	revalidatePath("/dashboard");
-
-	return { success: true };
+	if (error) throw error;
 }
 
-export async function editGoalAction(
+export async function updateGoalAction(
 	id: string,
 	updates: {
 		title?: string;
-		description?: string;
+		start_time?: string;
+		end_time?: string;
 	},
 ) {
 	const supabase = await createSupabaseServerClient();
+	const user = await getCurrentUser();
 
-	const { data, error } = await supabase
+	const { error } = await supabase
 		.from("goals")
 		.update(updates)
 		.eq("id", id)
-		.select()
-		.single();
+		.eq("owner_id", user.id);
 
-	if (error) {
-		console.error("Error updating goal:", error);
-		throw new Error("Failed to update goal");
-	}
-
-	revalidatePath("/dashboard");
-
-	return data;
+	if (error) throw error;
 }

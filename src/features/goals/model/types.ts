@@ -1,15 +1,22 @@
-export const PERIOD_ORDER = [
-	"day",
-	"week",
-	"month",
-	"year",
-	"someday",
-] as const;
+export type RecurrenceType = "none" | "daily" | "weekly";
+export type GoalStatus = "planned" | "completed";
 
-export const PERIOD_LABEL: Record<string, string> = {
-	day: "Today",
-	week: "This Week",
-	month: "This Month",
-	year: "This Year",
-	someday: "Someday",
+export type Goal = {
+	id: string;
+	owner_id: string;
+
+	title: string;
+
+	start_time: string;
+	end_time: string;
+
+	start_date: string | null;
+
+	recurrence_type: RecurrenceType;
+	recurrence_days: number[] | null;
+	recurrence_end: string | null;
+
+	parent_id: string | null;
+
+	created_at: string;
 };
