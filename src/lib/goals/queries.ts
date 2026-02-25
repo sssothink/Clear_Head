@@ -1,4 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
+import { getWeekDates } from "../utils";
+import { DayEvent } from "@/features/goals/day/DayClient";
+import { getDayEvents } from "./day-service";
 
 export async function getCurrentUser() {
 	const supabase = await createSupabaseServerClient();
@@ -26,4 +29,16 @@ export async function getGoalOverrides(userId: string, date: string) {
 		.eq("owner_id", userId)
 		.eq("date", date)
 		.eq("is_deleted", false);
+}
+
+export async function getWeekEvents(baseDate: string) {
+	const dates = getWeekDates(baseDate);
+
+	const result: Record<string, DayEvent[]> = {};
+
+	for (const date of dates) {
+		result[date] = await getDayEvents(date);
+	}
+
+	return result;
 }
