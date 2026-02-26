@@ -4,9 +4,11 @@ import { getWeekEvents } from "@/lib/goals/queries";
 const DashboardPage = async ({
 	searchParams,
 }: {
-	searchParams: { date?: string };
+	searchParams: Promise<{ date?: string }>;
 }) => {
-	const baseDate = searchParams.date ?? new Date().toISOString().split("T")[0];
+	const resolvedSearchPaarams = await searchParams;
+	const baseDate =
+		resolvedSearchPaarams.date ?? new Date().toISOString().split("T")[0];
 
 	const weekEvets = await getWeekEvents(baseDate);
 	return <WeekClient baseDate={baseDate} weekEvents={weekEvets} />;

@@ -53,7 +53,7 @@ export function useOptimisticGoals(initialEvents: DayEvent[], date: string) {
 
 		startTransition(async () => {
 			try {
-				await createDayGoalAction(id, data);
+				await createDayGoalAction(id, date, data);
 
 				requestVersion.current.delete(id);
 			} catch {

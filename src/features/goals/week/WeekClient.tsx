@@ -1,6 +1,6 @@
 "use client";
 
-import { getWeekDates } from "@/lib/utils";
+import { getWeekDates } from "@/shared/lib/date";
 import DayClient, { DayEvent } from "../day/DayClient";
 
 type WeekClientProps = {

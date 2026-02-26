@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
-import { getWeekDates } from "../utils";
+import { getWeekDates } from "@/shared/lib/date";
 import { DayEvent } from "@/features/goals/day/DayClient";
 import { getDayEvents } from "./day-service";
 

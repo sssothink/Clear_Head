@@ -3,7 +3,7 @@
 import { Card } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Check, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { motion } from "framer-motion";
 import { DayEvent } from "./DayClient";
 

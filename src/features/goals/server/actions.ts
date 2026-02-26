@@ -7,6 +7,7 @@ import { GoalStatus } from "../model/types";
 
 export async function createDayGoalAction(
 	id: string,
+	date: string,
 	data: {
 		title: string;
 		start_time: string;
@@ -24,10 +25,7 @@ export async function createDayGoalAction(
 			id,
 			owner_id: user.id,
 			...data,
-			start_date:
-				data.recurrence_type === "none"
-					? new Date().toISOString().split("T")[0]
-					: null,
+			start_date: data.recurrence_type === "none" ? date : null,
 		})
 		.select("id")
 		.single();
