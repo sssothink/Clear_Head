@@ -31,14 +31,14 @@ export async function getGoalOverrides(userId: string, date: string) {
 		.eq("is_deleted", false);
 }
 
-export async function getWeekEvents(baseDate: string) {
-	const dates = getWeekDates(baseDate);
+// export async function getWeekEvents(baseDate: string) {
+// 	const dates = getWeekDates(baseDate);
 
-	const result: Record<string, DayEvent[]> = {};
+// 	const result: Record<string, DayEvent[]> = {};
 
-	for (const date of dates) {
-		result[date] = await getDayEvents(date);
-	}
+// 	for (const date of dates) {
+// 		result[date] = await getDayEvents(date);
+// 	}
 
-	return result;
-}
+// 	return result;
+// }

@@ -1,5 +1,11 @@
 export type RecurrenceType = "none" | "daily" | "weekly";
 export type GoalStatus = "planned" | "completed";
+export type ISODate = string;
+
+export type SelectedSlot = {
+	dayIndex: number;
+	hourIndex: number;
+} | null;
 
 export type Goal = {
 	id: string;

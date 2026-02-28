@@ -1,14 +1,18 @@
-export function getWeekDates(baseDate: string) {
-	const date = new Date(baseDate);
+export function getStartOfWeek(date: Date) {
 	const day = date.getDay();
-
-	const mondayOffset = day === 0 ? -6 : 1 - day;
+	const diff = day === 0 ? -6 : 1 - day;
 	const monday = new Date(date);
-	monday.setDate(date.getDate() + mondayOffset);
+	monday.setDate(date.getDate() + diff);
+	monday.setHours(0, 0, 0, 0);
+	return monday;
+}
 
-	return Array.from({ length: 7 }).map((_, i) => {
-		const d = new Date(monday);
-		d.setDate(monday.getDate() + i);
-		return d.toISOString().split("T")[0];
+export function getWeekDates(baseDate: Date) {
+	const start = getStartOfWeek(baseDate);
+
+	return Array.from({ length: 7 }, (_, i) => {
+		const d = new Date(start);
+		d.setDate(start.getDate() + i);
+		return d;
 	});
 }

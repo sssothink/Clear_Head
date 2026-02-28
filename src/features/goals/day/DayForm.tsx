@@ -13,6 +13,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 type DayFormProps = {
+	defaultStartTime?: string;
+	defaultEndTime?: string;
 	onCreateGoal: (data: {
 		title: string;
 		start_time: string;
@@ -22,10 +24,14 @@ type DayFormProps = {
 	}) => void;
 };
 
-export default function DayForm({ onCreateGoal }: DayFormProps) {
+export default function DayForm({
+	defaultStartTime,
+	defaultEndTime,
+	onCreateGoal,
+}: DayFormProps) {
 	const [title, setTitle] = useState("");
-	const [startTime, setStartTime] = useState("09:00");
-	const [endTime, setEndTime] = useState("10:00");
+	const [startTime, setStartTime] = useState(defaultStartTime ?? "09:00");
+	const [endTime, setEndTime] = useState(defaultEndTime ?? "10:00");
 	const [recurrence, setRecurrence] = useState<"none" | "daily" | "weekly">(
 		"none",
 	);
