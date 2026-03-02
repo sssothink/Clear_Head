@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
-import { getWeekDates } from "@/shared/lib/date";
-import { DayEvent } from "@/features/goals/day/DayClient";
-import { getDayEvents } from "./day-service";
+// import { getWeekDates } from "@/shared/lib/date";
+// import { DayEvent } from "@/features/goals/day/DayClient";
+// import { getDayEvents } from "./day-service";
 
 export async function getCurrentUser() {
 	const supabase = await createSupabaseServerClient();
@@ -17,7 +17,11 @@ export async function getCurrentUser() {
 export async function getUserDayGoals(userId: string) {
 	const supabase = await createSupabaseServerClient();
 
-	return supabase.from("goals").select("*").eq("owner_id", userId);
+	return supabase
+		.from("goals")
+		.select("*")
+		.eq("owner_id", userId)
+		.eq("is_deleted", false);
 }
 
 export async function getGoalOverrides(userId: string, date: string) {

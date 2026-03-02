@@ -23,7 +23,7 @@ const loginPage = () => {
 		if (error) {
 			setError(error.message);
 		} else {
-			router.push("/dashboard/day");
+			router.push("/dashboard");
 		}
 	};
 

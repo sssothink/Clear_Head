@@ -3,16 +3,8 @@
 import DayList from "./DayList";
 import DayForm from "./DayForm";
 
-import { GoalStatus } from "../model/types";
+import { DayEvent } from "../model/types";
 import { useOptimisticGoals } from "../hooks/useOptimisticGoals";
-
-export type DayEvent = {
-	id: string;
-	title: string;
-	start_time: string;
-	end_time: string;
-	status: GoalStatus;
-};
 
 export default function DayClient({
 	initialEvents,
@@ -26,7 +18,7 @@ export default function DayClient({
 
 	return (
 		<div className="max-w-2xl mx-auto px-6 py-8">
-			<DayForm onCreateGoal={createGoal} />
+			<DayForm onSubmit={createGoal} />
 			<DayList
 				events={events}
 				onToggle={toggleComplete}

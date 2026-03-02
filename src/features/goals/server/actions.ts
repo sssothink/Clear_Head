@@ -5,27 +5,27 @@ import { getCurrentUser } from "@/lib/goals/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 import { GoalStatus } from "../model/types";
 
-export async function createDayGoalAction(
-	id: string,
-	date: string,
-	data: {
-		title: string;
-		start_time: string;
-		end_time: string;
-		recurrence_type: "none" | "daily" | "weekly";
-		recurrence_days?: number[];
-	},
-) {
+export async function createDayGoalAction(data: {
+	title: string;
+	date: string;
+	start_time: string;
+	end_time: string;
+	recurrence_type: "none" | "daily" | "weekly";
+	recurrence_days?: number[];
+}) {
 	const supabase = await createSupabaseServerClient();
 	const user = await getCurrentUser();
 
 	const { data: created, error } = await supabase
 		.from("goals")
 		.insert({
-			id,
+			title: data.title,
 			owner_id: user.id,
-			...data,
-			start_date: data.recurrence_type === "none" ? date : null,
+			start_time: data.start_time,
+			end_time: data.end_time,
+			recurrence_type: data.recurrence_type,
+			recurrence_days: data.recurrence_days ?? null,
+			start_date: data.recurrence_type === "none" ? data.date : null,
 		})
 		.select("id")
 		.single();

@@ -9,7 +9,7 @@ export default function TimeColumn() {
 			{hours.map((hour) => (
 				<div
 					key={hour}
-					className="h-20 flex items-start justify-end pr-1 text-xs text-muted-foreground border-b border-border"
+					className="h-15 flex items-start justify-end pr-1 text-xs text-muted-foreground border-b border-border"
 				>
 					{hour}
 				</div>

@@ -101,3 +101,8 @@ body {
 .pulse-button {
 	animation: subtlePulse 2.5s infinite;
 }
+
+.event {
+	@apply flex flex-col gap-2 rounded-lg p-4;
+	background: rgb(44, 76, 239);
+}

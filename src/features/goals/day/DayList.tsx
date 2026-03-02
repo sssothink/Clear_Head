@@ -5,7 +5,7 @@ import { Button } from "@/shared/ui/button";
 import { Check, X } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { motion } from "framer-motion";
-import { DayEvent } from "./DayClient";
+import { DayEvent } from "../model/types";
 
 type DayListProps = {
 	events: DayEvent[];

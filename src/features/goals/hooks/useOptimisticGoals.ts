@@ -5,10 +5,13 @@ import {
 	setGoalOccurrenceStatusAction,
 	updateGoalAction,
 } from "../server/actions";
-import { GoalStatus } from "../model/types";
-import { DayEvent } from "../day/DayClient";
+import { DayEvent, GoalStatus } from "../model/types";
+import { differenceInDays } from "date-fns";
 
-export function useOptimisticGoals(initialEvents: DayEvent[], date: string) {
+export function useOptimisticGoals(
+	initialEvents: DayEvent[],
+	weekStart: string,
+) {
 	const [events, setEvents] = useState<DayEvent[]>(initialEvents);
 	const [isPending, startTransition] = useTransition();
 
@@ -31,14 +34,21 @@ export function useOptimisticGoals(initialEvents: DayEvent[], date: string) {
 		title: string;
 		start_time: string;
 		end_time: string;
+		date: string;
 		recurrence_type: "none" | "daily" | "weekly";
 		recurrence_days?: number[];
 	}) => {
 		const id = crypto.randomUUID();
 
+		// Calculate dayIndex from weekStart
+		const weekStartDate = new Date(weekStart);
+		const goalDate = new Date(data.date);
+		const dayIndex = differenceInDays(goalDate, weekStartDate);
+
 		const optimistic: DayEvent = {
 			id,
 			title: data.title,
+			dayIndex: Math.max(0, Math.min(6, dayIndex)),
 			start_time: data.start_time,
 			end_time: data.end_time,
 			status: "planned",
@@ -53,9 +63,15 @@ export function useOptimisticGoals(initialEvents: DayEvent[], date: string) {
 
 		startTransition(async () => {
 			try {
-				await createDayGoalAction(id, date, data);
+				const created = await createDayGoalAction(data);
+
+				// Replace temporary ID with real ID from server
+				setEvents((prev) =>
+					prev.map((e) => (e.id === id ? { ...e, id: created.id } : e)),
+				);
 
 				requestVersion.current.delete(id);
+				requestVersion.current.set(created.id, 0); // Mark real ID as final
 			} catch {
 				setEvents((prev) => prev.filter((e) => e.id !== id));
 			}
@@ -79,7 +95,12 @@ export function useOptimisticGoals(initialEvents: DayEvent[], date: string) {
 
 		startTransition(async () => {
 			try {
-				await setGoalOccurrenceStatusAction(goalId, date, newStatus);
+				// Calculate date from dayIndex and weekStart
+				const goalDate = new Date(weekStart);
+				goalDate.setDate(goalDate.getDate() + target.dayIndex);
+				const formattedDate = goalDate.toISOString().split("T")[0];
+
+				await setGoalOccurrenceStatusAction(goalId, formattedDate, newStatus);
 			} catch {
 				if (isLatest(goalId, version)) {
 					setEvents((prev) =>

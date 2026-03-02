@@ -1,13 +1,11 @@
 type Props = {
-	dayIndex: number;
-	hourIndex: number;
-	onClick: (slot: { dayIndex: number; hourIndex: number }) => void;
+	onClick: () => void;
 };
-export default function WeekCell({ dayIndex, hourIndex, onClick }: Props) {
+export default function WeekCell({ onClick }: Props) {
 	return (
 		<div
-			className="h-20 border-r border-b border-border hover:bg-muted/40 transition-colors"
-			onClick={() => onClick({ dayIndex, hourIndex })}
+			className="h-15 border-r border-b border-border hover:bg-muted/40 transition-colors"
+			onClick={onClick}
 		></div>
 	);
 }

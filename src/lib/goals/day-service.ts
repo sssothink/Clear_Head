@@ -17,6 +17,7 @@ export async function getDayEvents(date: string) {
 	const events =
 		goals
 			?.filter((goal) => {
+			if (goal.is_deleted) return false;
 				if (goal.recurrence_type === "none") {
 					return goal.start_date === date;
 				}
@@ -47,6 +48,7 @@ export async function getDayEvents(date: string) {
 				return {
 					id: goal.id,
 					title: goal.title,
+					dayIndex: 0,
 					start_time: goal.start_time,
 					end_time: goal.end_time,
 					status: override?.status ?? "planned",

@@ -13,23 +13,31 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 type DayFormProps = {
+	defaultTitle?: string;
 	defaultStartTime?: string;
 	defaultEndTime?: string;
-	onCreateGoal: (data: {
+	defaultDate?: string;
+	onSubmit: (data: {
 		title: string;
 		start_time: string;
 		end_time: string;
+		date: string;
 		recurrence_type: "none" | "daily" | "weekly";
 		recurrence_days?: number[];
 	}) => void;
 };
 
 export default function DayForm({
+	defaultTitle,
 	defaultStartTime,
 	defaultEndTime,
-	onCreateGoal,
+	defaultDate,
+	onSubmit,
 }: DayFormProps) {
-	const [title, setTitle] = useState("");
+	const [title, setTitle] = useState(defaultTitle ?? "");
+	const [date, setDate] = useState<string>(
+		defaultDate ?? new Date().toISOString().split("T")[0],
+	);
 	const [startTime, setStartTime] = useState(defaultStartTime ?? "09:00");
 	const [endTime, setEndTime] = useState(defaultEndTime ?? "10:00");
 	const [recurrence, setRecurrence] = useState<"none" | "daily" | "weekly">(
@@ -46,10 +54,11 @@ export default function DayForm({
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 
-		onCreateGoal({
+		onSubmit({
 			title,
 			start_time: startTime,
 			end_time: endTime,
+			date,
 			recurrence_type: recurrence,
 			recurrence_days: recurrence === "weekly" ? days : undefined,
 		});

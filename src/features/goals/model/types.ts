@@ -5,7 +5,17 @@ export type ISODate = string;
 export type SelectedSlot = {
 	dayIndex: number;
 	hourIndex: number;
+	date: string;
 } | null;
+
+export type DayEvent = {
+	id: string;
+	title: string;
+	dayIndex: number;
+	start_time: string;
+	end_time: string;
+	status?: GoalStatus;
+};
 
 export type Goal = {
 	id: string;
