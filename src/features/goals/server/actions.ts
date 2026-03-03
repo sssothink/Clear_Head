@@ -67,6 +67,7 @@ export async function updateGoalAction(
 		title?: string;
 		start_time?: string;
 		end_time?: string;
+		start_date?: string | null;
 	},
 ) {
 	const supabase = await createSupabaseServerClient();

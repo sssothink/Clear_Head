@@ -6,7 +6,7 @@ export type SelectedSlot = {
 	dayIndex: number;
 	hourIndex: number;
 	date: string;
-} | null;
+};
 
 export type DayEvent = {
 	id: string;
@@ -14,7 +14,8 @@ export type DayEvent = {
 	dayIndex: number;
 	start_time: string;
 	end_time: string;
-	status?: GoalStatus;
+	start_date?: string | null;
+	status: GoalStatus;
 };
 
 export type Goal = {

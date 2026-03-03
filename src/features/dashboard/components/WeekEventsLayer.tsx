@@ -1,41 +1,27 @@
 "use client";
-import { useOptimisticGoals } from "@/features/goals/hooks/useOptimisticGoals";
-import { DayEvent as Event } from "@/features/goals/model/types";
+
 import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/button";
 import { Check, Pen, Trash, X } from "lucide-react";
-
-// const mockEvents: Event[] = [
-// 	{
-// 		id: "1",
-// 		title: "Morning Jog",
-// 		dayIndex: 6,
-// 		start_time: "09:30",
-// 		end_time: "11:00",
-// 	},
-// 	{
-// 		id: "2",
-// 		title: "Afternoon Yoga",
-// 		dayIndex: 6,
-// 		start_time: "14:00",
-// 		end_time: "15:30",
-// 	},
-// ];
+import { useDashboard } from "../context/DashboardContext";
+import { useState } from "react";
 
 const HOUR_HEIGHT = 60;
 const MINUTE_HEIGHT = HOUR_HEIGHT / 60;
 
-export default function WeekEventsLayer({
-	events,
-	onToggle,
-	onDeleteGoal,
-	onEditGoal,
-}: {
-	events: Event[];
-	onToggle: (id: string) => void;
-	onDeleteGoal: (id: string) => void;
-	onEditGoal: (id: string) => void;
-}) {
+export default function WeekEventsLayer() {
+	const { events, onToggle, onDelete, onEdit } = useDashboard();
+	const [draggedEventId, setDraggedEventId] = useState<string | null>(null);
+
+	const handleDragStart = (e: React.DragEvent<HTMLDivElement>, eventId: string) => {
+		e.dataTransfer.effectAllowed = "move";
+		e.dataTransfer.setData("eventId", eventId);
+		setDraggedEventId(eventId);
+	};
+
+	const handleDragEnd = () => {
+		setDraggedEventId(null);
+	};
 	return (
 		<div className="absolute inset-0 pointer-events-none">
 			{events.map((event) => {
@@ -54,9 +40,13 @@ export default function WeekEventsLayer({
 				return (
 					<div
 						key={event.id}
+						draggable
+						onDragStart={(e) => handleDragStart(e, event.id)}
+						onDragEnd={handleDragEnd}
 						className={cn(
-							"event absolute pointer-events-auto justify-between p-3 transition-all group",
+							"event absolute pointer-events-auto justify-between p-3 transition-all group cursor-move",
 							event.status === "completed" && "opacity-60",
+							draggedEventId === event.id && "opacity-40 scale-95",
 						)}
 						style={{
 							top,
@@ -84,7 +74,7 @@ export default function WeekEventsLayer({
 							<Button
 								size="xs"
 								variant="ghost"
-								onClick={() => onEditGoal(event.id)}
+								onClick={() => onEdit(event.id)}
 								className="border-2 rounded-[0.6em] cursor-pointer active:scale-97"
 							>
 								<Pen size={10}></Pen>
@@ -92,7 +82,7 @@ export default function WeekEventsLayer({
 							<Button
 								size="xs"
 								variant="ghost"
-								onClick={() => onDeleteGoal(event.id)}
+								onClick={() => onDelete(event.id)}
 								className="border-2 rounded-[0.6em] cursor-pointer active:scale-97"
 							>
 								<Trash size={10}></Trash>

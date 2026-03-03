@@ -1,29 +1,10 @@
-import { DayEvent, Goal } from "@/features/goals/model/types";
 import WeekCell from "./WeekCell";
 import WeekEventsLayer from "./WeekEventsLayer";
 import { addDays } from "date-fns";
+import { useDashboard } from "../context/DashboardContext";
 
-type Props = {
-	onCellClick: (slot: {
-		dayIndex: number;
-		hourIndex: number;
-		date: string;
-	}) => void;
-	events: DayEvent[];
-	weekStart: string;
-	onToggle: (id: string) => void;
-	onDeleteGoal: (id: string) => void;
-	onEditGoal: (id: string) => void;
-};
-
-export default function WeekGrid({
-	onCellClick,
-	events,
-	weekStart,
-	onToggle,
-	onDeleteGoal,
-	onEditGoal,
-}: Props) {
+export default function WeekGrid() {
+	const { events, weekStart, onCellClick, onToggle, onDelete, onEdit } = useDashboard();
 	const hours = Array.from({ length: 24 });
 	const days = Array.from({ length: 7 });
 
@@ -35,11 +16,13 @@ export default function WeekGrid({
 						days.map((_, dayIndex) => (
 							<WeekCell
 								key={`${dayIndex}-${hourIndex}`}
+								dayIndex={dayIndex}
+								hourIndex={hourIndex}
 								onClick={() =>
 									onCellClick({
 										dayIndex,
 										hourIndex,
-										date: addDays(new Date(weekStart), dayIndex + 1)
+										date: addDays(new Date(weekStart), dayIndex)
 											.toISOString()
 											.split("T")[0],
 									})
@@ -49,12 +32,7 @@ export default function WeekGrid({
 					)}
 				</div>
 
-				<WeekEventsLayer
-					events={events}
-					onToggle={onToggle}
-					onDeleteGoal={onDeleteGoal}
-					onEditGoal={onEditGoal}
-				/>
+				<WeekEventsLayer />
 			</div>
 		</div>
 	);
