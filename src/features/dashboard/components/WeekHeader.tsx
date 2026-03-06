@@ -7,7 +7,7 @@ export default function WeekHeader() {
 	const weekDates = getWeekDates(today);
 
 	return (
-		<div className="flex sticky top-0 bg-background z-10">
+		<div className="flex sticky top-0 bg-background z-11">
 			<div className="w-10 p-4 font-medium border-r border-b border-border"></div>
 			<div className="flex-1 grid grid-cols-7 border-b border-border">
 				{weekDates.map((date) => {

@@ -4,7 +4,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-const registerPage = () => {
+const RegisterPage = () => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<String | null>(null);
@@ -59,4 +59,4 @@ const registerPage = () => {
 	);
 };
 
-export default registerPage;
+export default RegisterPage;

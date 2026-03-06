@@ -32,9 +32,9 @@ export default function WeekCell({ onClick, dayIndex, hourIndex }: Props) {
 
 	return (
 		<div
-			className={`h-15 border-r border-b border-border hover:bg-muted/40 transition-colors ${
-				isDragOver ? "bg-blue-100/50" : ""
-			}`}
+			className={`h-15 border-r border-b border-border hover:bg-muted/40 transition-colors
+				${isDragOver ? "bg-blue-100/50" : ""}
+			`}
 			onClick={onClick}
 			onDragOver={handleDragOver}
 			onDragLeave={handleDragLeave}
@@ -42,4 +42,3 @@ export default function WeekCell({ onClick, dayIndex, hourIndex }: Props) {
 		></div>
 	);
 }
-

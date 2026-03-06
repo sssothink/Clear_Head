@@ -109,8 +109,7 @@ export function useGoalActions(
 
 		startTransition(async () => {
 			try {
-				// Отфильтровать dayIndex — это клиентское поле, его нельзя отправлять в БД
-				const { dayIndex, ...dataForServer } = data as any;
+				const { dayIndex, ...dataForServer } = data;
 				await updateGoalAction(goalId, dataForServer);
 			} catch {
 				if (isLatest(goalId, version)) {

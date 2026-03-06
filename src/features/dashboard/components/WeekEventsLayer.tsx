@@ -13,15 +13,19 @@ export default function WeekEventsLayer() {
 	const { events, onToggle, onDelete, onEdit } = useDashboard();
 	const [draggedEventId, setDraggedEventId] = useState<string | null>(null);
 
-	const handleDragStart = (e: React.DragEvent<HTMLDivElement>, eventId: string) => {
-		e.dataTransfer.effectAllowed = "move";
-		e.dataTransfer.setData("eventId", eventId);
+	const handleDragStart = (
+		event: React.DragEvent<HTMLDivElement>,
+		eventId: string,
+	) => {
+		event.dataTransfer.effectAllowed = "move";
+		event.dataTransfer.setData("eventId", eventId);
 		setDraggedEventId(eventId);
 	};
 
 	const handleDragEnd = () => {
 		setDraggedEventId(null);
 	};
+
 	return (
 		<div className="absolute inset-0 pointer-events-none">
 			{events.map((event) => {
@@ -44,9 +48,9 @@ export default function WeekEventsLayer() {
 						onDragStart={(e) => handleDragStart(e, event.id)}
 						onDragEnd={handleDragEnd}
 						className={cn(
-							"event absolute pointer-events-auto justify-between p-3 transition-all group cursor-move",
+							"event absolute pointer-events-auto justify-between p-3 transition-all group",
 							event.status === "completed" && "opacity-60",
-							draggedEventId === event.id && "opacity-40 scale-95",
+							draggedEventId === event.id && "opacity-40 scale-90",
 						)}
 						style={{
 							top,

@@ -29,9 +29,13 @@ export type DashboardContextType = {
 		recurrence_days?: number[];
 	}) => void;
 
-	onClose: () => void;
+	onEventDrop: (
+		eventId: string,
+		newDayIndex: number,
+		newHourIndex: number,
+	) => void;
 
-onEventDrop: (eventId: string, newDayIndex: number, newHourIndex: number) => void;
+	onClose: () => void;
 
 	onToggle: (id: string) => void;
 	onDelete: (id: string) => void;
@@ -122,36 +126,28 @@ export function DashboardProvider({
 	const handleEventDrop = useCallback(
 		(eventId: string, newDayIndex: number, newHourIndex: number) => {
 			const event = events.find((e) => e.id === eventId);
+
 			if (!event) return;
 
-			// Вычислить длительность события в минутах
 			const [startHour, startMinute] = event.start_time.split(":").map(Number);
 			const [endHour, endMinute] = event.end_time.split(":").map(Number);
 			const durationMinutes =
 				endHour * 60 + endMinute - (startHour * 60 + startMinute);
 
-			// Новое время начала
 			const newStartHour = newHourIndex;
 			const newStartMinute = 0;
-			const newStartTime = `${String(newStartHour).padStart(2, "0")}:${String(
-				newStartMinute,
-			).padStart(2, "0")}`;
+			const newStartTime = `${String(newStartHour).padStart(2, "0")}:${String(newStartMinute).padStart(2, "0")}`;
 
-			// Новое время конца
-			const totalEndMinutes = newStartHour * 60 + newStartMinute + durationMinutes;
-			const newEndHour = Math.floor(totalEndMinutes / 60) % 24;
-			const newEndMinute = totalEndMinutes % 60;
-			const newEndTime = `${String(newEndHour).padStart(2, "0")}:${String(
-				newEndMinute,
-			).padStart(2, "0")}`;
+			const totalEndMinut =
+				newStartHour * 60 + newStartMinute + durationMinutes;
+			const newEndHour = Math.floor(totalEndMinut / 60);
+			const newEndMinute = totalEndMinut % 60;
+			const newEndTime = `${String(newEndHour).padStart(2, "0")}:${String(newEndMinute).padStart(2, "0")}`;
 
-			// Вычислить новую дату на основе weekStart и newDayIndex
-			// Используем ту же логику, что и в buildWeekEvents
 			const weekStartDate = new Date(weekStart);
 			const newDate = addDays(weekStartDate, newDayIndex);
 			const newDateStr = format(newDate, "yyyy-MM-dd");
 
-			// Обновить событие с новой датой, временем и dayIndex
 			updateGoal(eventId, {
 				dayIndex: newDayIndex,
 				start_time: newStartTime,
@@ -162,7 +158,6 @@ export function DashboardProvider({
 		},
 		[events, updateGoal, weekStart],
 	);
-
 
 	const value = useMemo<DashboardContextType>(
 		() => ({
