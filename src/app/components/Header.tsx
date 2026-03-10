@@ -7,10 +7,11 @@ import { useEffect, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 
 const Header = () => {
-	const supabase = getSupabaseBrowserClient();
 	const [user, setUser] = useState<User | null>(null);
 
 	useEffect(() => {
+		const supabase = getSupabaseBrowserClient();
+
 		supabase.auth.getUser().then(({ data }) => {
 			setUser(data.user);
 		});

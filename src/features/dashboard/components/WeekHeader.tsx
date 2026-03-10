@@ -1,4 +1,3 @@
-import { cn } from "@/shared/lib/cn";
 import { getWeekDates } from "@/shared/lib/date";
 import { format } from "date-fns";
 

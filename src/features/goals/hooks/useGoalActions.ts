@@ -1,5 +1,5 @@
 import { useTransition } from "react";
-import { differenceInDays } from "date-fns";
+import { differenceInDays, format } from "date-fns";
 import {
 	createDayGoalAction,
 	deleteGoalAction,
@@ -17,7 +17,6 @@ export function useGoalActions(
 		deleteEvent: (id: string) => void;
 		replaceEvent: (oldId: string, newId: string) => void;
 		restoreEvent: (event: DayEvent) => void;
-		setEvents: (events: DayEvent[]) => void;
 	},
 	weekStart: string,
 ) {
@@ -84,7 +83,7 @@ export function useGoalActions(
 			try {
 				const goalDate = new Date(weekStart);
 				goalDate.setDate(goalDate.getDate() + target.dayIndex);
-				const formattedDate = goalDate.toISOString().split("T")[0];
+				const formattedDate = format(goalDate, "yyyy-MM-dd");
 
 				await setGoalOccurrenceStatusAction(goalId, formattedDate, newStatus);
 			} catch {
@@ -109,12 +108,19 @@ export function useGoalActions(
 
 		startTransition(async () => {
 			try {
-				const { dayIndex, ...dataForServer } = data;
+				const dataForServer = { ...data };
+				delete dataForServer.dayIndex;
 				await updateGoalAction(goalId, dataForServer);
 			} catch {
 				if (isLatest(goalId, version)) {
-					const { status, ...restOfPrevious } = previous;
-					onEventsChange.updateEvent(goalId, restOfPrevious);
+					onEventsChange.updateEvent(goalId, {
+						title: previous.title,
+						dayIndex: previous.dayIndex,
+						start_time: previous.start_time,
+						end_time: previous.end_time,
+						start_date: previous.start_date,
+						status: previous.status,
+					});
 				}
 			}
 		});

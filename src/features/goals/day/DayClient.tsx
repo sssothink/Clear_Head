@@ -13,8 +13,10 @@ export default function DayClient({
 	initialEvents: DayEvent[];
 	date: string;
 }) {
-	const { events, createGoal, toggleComplete, updateGoal, deleteGoal } =
-		useOptimisticGoals(initialEvents, date);
+	const { events, createGoal, toggleComplete } = useOptimisticGoals(
+		initialEvents,
+		date,
+	);
 
 	return (
 		<div className="max-w-2xl mx-auto px-6 py-8">
@@ -22,8 +24,6 @@ export default function DayClient({
 			<DayList
 				events={events}
 				onToggle={toggleComplete}
-				onEditGoal={updateGoal}
-				onDeleteGoal={deleteGoal}
 			/>
 		</div>
 	);

@@ -1,21 +1,29 @@
+"use client";
+
 import WeekCell from "./WeekCell";
 import WeekEventsLayer from "./WeekEventsLayer";
-import { addDays } from "date-fns";
+import { addDays, format } from "date-fns";
 import { useDashboard } from "../context/DashboardContext";
+import { useEffect, useState } from "react";
 
 const HOUR_HEIGHT = 60;
 const MINUTE_HEIGHT = HOUR_HEIGHT / 60;
 
 export default function WeekGrid() {
-	const { events, weekStart, onCellClick, onToggle, onDelete, onEdit } =
-		useDashboard();
+	const { weekStart, onCellClick } = useDashboard();
+	const [now, setNow] = useState(new Date());
 	const hours = Array.from({ length: 24 });
 	const days = Array.from({ length: 7 });
-	const now = new Date();
 	const currentHour = now.getHours();
 	const currentMinute = now.getMinutes();
 	const currentTimeTop =
 		currentHour * HOUR_HEIGHT + currentMinute + MINUTE_HEIGHT;
+
+	useEffect(() => {
+		const tick = () => setNow(new Date());
+		const id = setInterval(tick, 60000);
+		return () => clearInterval(id);
+	}, []);
 
 	return (
 		<div className="flex-1">
@@ -31,9 +39,10 @@ export default function WeekGrid() {
 									onCellClick({
 										dayIndex,
 										hourIndex,
-										date: addDays(new Date(weekStart), dayIndex)
-											.toISOString()
-											.split("T")[0],
+										date: format(
+											addDays(new Date(weekStart), dayIndex),
+											"yyyy-MM-dd",
+										),
 									})
 								}
 							/>
@@ -50,7 +59,7 @@ export default function WeekGrid() {
 
 				<div
 					style={{ top: `${currentTimeTop}px` }}
-					className="absolute left-0 right-0 h-0.5 bg-red-500 z-10 poiner-events-none"
+					className="absolute left-0 right-0 h-0.5 bg-red-500 z-10 pointer-events-none"
 				></div>
 
 				<WeekEventsLayer />

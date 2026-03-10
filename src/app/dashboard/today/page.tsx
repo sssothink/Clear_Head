@@ -1,8 +1,9 @@
 import { getDayEvents } from "@/lib/goals/day-service";
 import DayClient from "@/features/goals/day/DayClient";
+import { format } from "date-fns";
 
 export default async function DayPage() {
-	const today = new Date().toISOString().split("T")[0];
+	const today = format(new Date(), "yyyy-MM-dd");
 
 	const events = await getDayEvents(today);
 

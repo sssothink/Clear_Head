@@ -7,7 +7,7 @@ import { useState } from "react";
 const RegisterPage = () => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	const [error, setError] = useState<String | null>(null);
+	const [error, setError] = useState<string | null>(null);
 	const supabase = getSupabaseBrowserClient();
 	const router = useRouter();
 

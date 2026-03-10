@@ -11,6 +11,7 @@ import {
 	SelectItem,
 } from "@/shared/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
+import { format } from "date-fns";
 
 type DayFormProps = {
 	defaultTitle?: string;
@@ -35,9 +36,7 @@ export default function DayForm({
 	onSubmit,
 }: DayFormProps) {
 	const [title, setTitle] = useState(defaultTitle ?? "");
-	const [date, setDate] = useState<string>(
-		defaultDate ?? new Date().toISOString().split("T")[0],
-	);
+	const date = defaultDate ?? format(new Date(), "yyyy-MM-dd");
 	const [startTime, setStartTime] = useState(defaultStartTime ?? "09:00");
 	const [endTime, setEndTime] = useState(defaultEndTime ?? "10:00");
 	const [recurrence, setRecurrence] = useState<"none" | "daily" | "weekly">(

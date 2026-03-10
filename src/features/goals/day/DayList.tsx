@@ -10,19 +10,9 @@ import { DayEvent } from "../model/types";
 type DayListProps = {
 	events: DayEvent[];
 	onToggle: (id: string) => void;
-	onDeleteGoal: (id: string) => void;
-	onEditGoal: (
-		id: string,
-		data: Partial<Omit<DayEvent, "id" | "status">>,
-	) => void;
 };
 
-export default function DayList({
-	events,
-	onToggle,
-	onDeleteGoal,
-	onEditGoal,
-}: DayListProps) {
+export default function DayList({ events, onToggle }: DayListProps) {
 	return (
 		<ul className="flex flex-col gap-3">
 			{events.map((event) => (

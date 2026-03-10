@@ -5,7 +5,9 @@ export async function getDayEvents(date: string) {
 
 	const { data: goals, error: goalsError } = await getUserDayGoals(user.id);
 
-	goalsError && console.error("Failed to get goals", goalsError);
+	if (goalsError) {
+		console.error("Failed to get goals", goalsError);
+	}
 
 	const { data: overrides } = await getGoalOverrides(user.id, date);
 

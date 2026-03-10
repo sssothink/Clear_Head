@@ -21,7 +21,6 @@ export function useOptimisticGoals(
 		deleteEvent,
 		replaceEvent,
 		restoreEvent,
-		setEvents,
 	} = useGoalEvents(initialEvents);
 
 	const { isPending, createGoal, toggleComplete, updateGoal, deleteGoal } =
@@ -33,7 +32,6 @@ export function useOptimisticGoals(
 				deleteEvent,
 				replaceEvent,
 				restoreEvent,
-				setEvents,
 			},
 			weekStart,
 		);

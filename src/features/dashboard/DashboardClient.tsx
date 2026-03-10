@@ -6,18 +6,13 @@ import WeekHeader from "./components/WeekHeader";
 import CreateGoal from "./components/CreateGoal";
 import { Goal } from "../goals/model/types";
 import { DashboardProvider, useDashboard } from "./context/DashboardContext";
-import { addDays } from "date-fns";
+import { addDays, format } from "date-fns";
 
 function DashboardContent() {
 	const {
-		events,
 		weekStart,
 		selectedSlot,
 		editingEvent,
-		onToggle,
-		onDelete,
-		onCellClick,
-		onEdit,
 		onSubmit,
 		onClose,
 	} = useDashboard();
@@ -41,9 +36,10 @@ function DashboardContent() {
 									title: editingEvent.title,
 									start_time: editingEvent.start_time,
 									end_time: editingEvent.end_time,
-									date: addDays(new Date(weekStart), editingEvent.dayIndex)
-										.toISOString()
-										.split("T")[0],
+									date: format(
+										addDays(new Date(weekStart), editingEvent.dayIndex),
+										"yyyy-MM-dd",
+									),
 								}
 							: undefined
 					}
