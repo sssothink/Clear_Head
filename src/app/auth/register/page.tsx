@@ -30,31 +30,45 @@ const RegisterPage = () => {
 	};
 
 	return (
-		<main className="p-6">
-			<form className="flex flex-col gap-1" onSubmit={handleRegister}>
-				<h1 className="text-2xl font-bold">Register form</h1>
-				<input
-					className="p-2 w-lg"
-					type="email"
-					placeholder="Email"
-					onChange={(e) => setEmail(e.target.value)}
-					value={email}
-					required
-				/>
-				<input
-					className="p-2 w-lg"
-					type="Password"
-					placeholder="Password"
-					onChange={(e) => setPassword(e.target.value)}
-					value={password}
-					required
-				/>
-				<button className="bg-black text-white w-fit p-2" type="submit">
-					Register
-				</button>
+		<main className="auth-shell mt-8">
+			<div className="auth-card container">
+				<div className="auth-head">
+					<div className="badge">Get started</div>
+					<h1>Create account</h1>
+				</div>
 
-				{error && <p className="text-2xl text-red-500">{error}</p>}
-			</form>
+				<form className="auth-form" onSubmit={handleRegister}>
+					<label htmlFor="email" className="form-label">
+						Email
+					</label>
+					<input
+						id="email"
+						className="form-input"
+						type="email"
+						placeholder="your@email.com"
+						onChange={(e) => setEmail(e.target.value)}
+						value={email}
+						required
+					/>
+					<label htmlFor="password" className="form-label">
+						Password
+					</label>
+					<input
+						id="password"
+						className="form-input"
+						type="Password"
+						placeholder="minimum 8 characters"
+						onChange={(e) => setPassword(e.target.value)}
+						value={password}
+						required
+					/>
+					<button className="btn-primary" type="submit">
+						Create account
+					</button>
+
+					{error && <div className="form-error">{error}</div>}
+				</form>
+			</div>
 		</main>
 	);
 };

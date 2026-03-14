@@ -26,26 +26,33 @@ const Header = () => {
 	}, []);
 
 	return (
-		<header className="flex justify-between p-4">
-			<h1 className="text-2xl font-bold">Clear Head</h1>
-			<nav>
-				<Link className="text-white bg-black m-2" href="/dashboard">
-					Dashboard
-				</Link>
+		<header className="border-b" style={{ borderColor: "var(--border)" }}>
+			<div className="container flex items-center justify-between py-4">
+				<h1 className="text-xl font-semibold tracking-tight">
+					<Link href="/">Clear Head</Link>
+				</h1>
+				<nav className="flex items-center gap-2">
+					<Link className="rounded-lg px-3 py-2 text-sm" href="/dashboard">
+						Dashboard
+					</Link>
 
-				{user ? (
-					<LogoutButton />
-				) : (
-					<>
-						<Link className="text-white bg-black m-2" href="/auth/register">
-							Register
-						</Link>
-						<Link className="text-white bg-black m-2" href="/auth/login">
-							Log in
-						</Link>
-					</>
-				)}
-			</nav>
+					{user ? (
+						<LogoutButton />
+					) : (
+						<>
+							<Link
+								className="rounded-lg px-3 py-2 text-sm"
+								href="/auth/register"
+							>
+								Register
+							</Link>
+							<Link className="rounded-lg px-3 py-2 text-sm" href="/auth/login">
+								Log in
+							</Link>
+						</>
+					)}
+				</nav>
+			</div>
 		</header>
 	);
 };

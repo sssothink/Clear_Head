@@ -1,21 +1,21 @@
 "use client";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const LogoutButton = () => {
 	const supabase = getSupabaseBrowserClient();
 	const router = useRouter();
 
-	const handleLogout = async () => {
-		await supabase.auth.signOut();
-		router.push("/auth/login");
-	};
-
 	return (
-		<button onClick={handleLogout} className="text-white bg-black m-2">
+		<Link
+			onClick={async () => await supabase.auth.signOut()}
+			className="rounded-lg px-3 py-2 text-sm cursor-pointer"
+			href="/auth/login"
+		>
 			Log out
-		</button>
+		</Link>
 	);
 };
 

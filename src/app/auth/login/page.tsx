@@ -23,42 +23,53 @@ const LoginPage = () => {
 		if (error) {
 			setError(error.message);
 		} else {
-			router.push("/dashboard");
+			router.push("/");
 		}
 	};
 
 	return (
-		<main className="p-6">
-			<form className="flex flex-col gap-3" onSubmit={handleLogin}>
-				<h1 className="text-2xl font-bold">Login</h1>
-				<input
-					className="p-2 w-lg"
-					type="email"
-					placeholder="Email"
-					onChange={(e) => setEmail(e.target.value)}
-					value={email}
-					required
-				/>
-				<input
-					className="p-2 w-lg"
-					type="password"
-					placeholder="Password"
-					onChange={(e) => setPassword(e.target.value)}
-					value={password}
-					required
-				/>
-				<button
-					className="bg-black text-white w-fit py-1 px-3 border-2 cursor-pointer"
-					type="submit"
-				>
-					Login
-				</button>
+		<main className="auth-shell mt-8">
+			<div className="auth-card container">
+				<div className="auth-head">
+					<h1>Log in</h1>
+					<p>Log in to continue using Clear Head</p>
+				</div>
 
-				{error && <p className="text-2xl text-red-500">{error}</p>}
-			</form>
-			<p className="text-xl mt-4">
-				Confirm the email if you have just registered.
-			</p>
+				<form className="auth-form" onSubmit={handleLogin}>
+					<label htmlFor="email" className="form-label">
+						Email
+					</label>
+					<input
+						id="email"
+						className="form-input"
+						type="email"
+						placeholder="your@email.com"
+						onChange={(e) => setEmail(e.target.value)}
+						value={email}
+						required
+					/>
+					<label className="form-label" htmlFor="password">
+						Password
+					</label>
+					<input
+						id="password"
+						className="form-input"
+						type="password"
+						placeholder="••••••••"
+						onChange={(e) => setPassword(e.target.value)}
+						value={password}
+						required
+					/>
+					<button className="btn-primary mt-2" type="submit">
+						Login
+					</button>
+
+					{error && <div className="form-error">{error}</div>}
+				</form>
+				<p className="form-help mt-4">
+					Confirm the email if you have just registered.
+				</p>
+			</div>
 		</main>
 	);
 };

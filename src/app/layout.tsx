@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import Header from "./components/Header";
 
-const geistSans = Geist({
-	variable: "--font-geist-sans",
+const spaceGrotesk = Space_Grotesk({
 	subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-	variable: "--font-geist-mono",
-	subsets: ["latin"],
+	variable: "--font-brand",
 });
 
 export const metadata: Metadata = {
@@ -25,13 +20,9 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-			>
-				<div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black">
-					<Header />
-					{children}
-				</div>
+			<body className={`${spaceGrotesk.variable} antialiased`}>
+				<Header />
+				{children}
 			</body>
 		</html>
 	);
