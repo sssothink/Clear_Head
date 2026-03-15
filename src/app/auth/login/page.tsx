@@ -28,7 +28,7 @@ const LoginPage = () => {
 	};
 
 	return (
-		<main className="auth-shell mt-8">
+		<main className="auth-shell">
 			<div className="auth-card container">
 				<div className="auth-head">
 					<h1>Log in</h1>

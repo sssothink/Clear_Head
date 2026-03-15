@@ -6,6 +6,7 @@ import { Check, X } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { motion } from "framer-motion";
 import { DayEvent } from "../model/types";
+import { toHHMM } from "@/lib/utils";
 
 type DayListProps = {
 	events: DayEvent[];
@@ -39,7 +40,7 @@ export default function DayList({ events, onToggle }: DayListProps) {
 								{event.title}
 							</p>
 							<p className="text-xs text-muted-foreground">
-								{event.start_time} – {event.end_time}
+								{toHHMM(event.start_time)} - {toHHMM(event.end_time)}
 							</p>
 						</div>
 

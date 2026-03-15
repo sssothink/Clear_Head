@@ -5,11 +5,11 @@ export default function TimeColumn() {
 	);
 
 	return (
-		<div className="w-10 border-r border-border">
+		<div className="w-12 border-r border-border bg-background/70">
 			{hours.map((hour) => (
 				<div
 					key={hour}
-					className="h-15 flex items-start justify-end pr-1 text-xs text-muted-foreground border-b border-border"
+					className="h-15 flex items-start justify-end pr-2 text-[11px] text-muted-foreground border-b border-border"
 				>
 					{hour}
 				</div>

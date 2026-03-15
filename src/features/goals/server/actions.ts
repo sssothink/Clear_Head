@@ -7,6 +7,7 @@ import { GoalStatus } from "../model/types";
 
 export async function createDayGoalAction(data: {
 	title: string;
+	description?: string;
 	date: string;
 	start_time: string;
 	end_time: string;
@@ -20,6 +21,7 @@ export async function createDayGoalAction(data: {
 		.from("goals")
 		.insert({
 			title: data.title,
+			description: data.description,
 			owner_id: user.id,
 			start_time: data.start_time,
 			end_time: data.end_time,
@@ -65,6 +67,7 @@ export async function updateGoalAction(
 	id: string,
 	updates: {
 		title?: string;
+		description?: string;
 		start_time?: string;
 		end_time?: string;
 		start_date?: string | null;
@@ -78,6 +81,49 @@ export async function updateGoalAction(
 		.update(updates)
 		.eq("id", id)
 		.eq("owner_id", user.id);
+
+	if (error) throw error;
+}
+
+export async function deleteGoalOccurrenceAction(goalId: string, date: string) {
+	const supabase = await createSupabaseServerClient();
+	const user = await getCurrentUser();
+
+	const { error } = await supabase.from("goal_occurrences").upsert(
+		{
+			goal_id: goalId,
+			owner_id: user.id,
+			date,
+			is_deleted: true,
+		},
+		{ onConflict: "goal_id,date" },
+	);
+
+	if (error) throw error;
+}
+
+export async function updateGoalOccurrenceAction(
+	goalId: string,
+	date: string,
+	updates: {
+		title?: string;
+		description?: string;
+		start_time?: string;
+		end_time?: string;
+	},
+) {
+	const supabase = await createSupabaseServerClient();
+	const user = await getCurrentUser();
+
+	const { error } = await supabase.from("goal_occurrences").upsert(
+		{
+			goal_id: goalId,
+			owner_id: user.id,
+			date,
+			...updates,
+		},
+		{ onConflict: "goal_id,date" },
+	);
 
 	if (error) throw error;
 }

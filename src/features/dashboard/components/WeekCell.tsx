@@ -9,7 +9,14 @@ type Props = {
 
 export default function WeekCell({ onClick, dayIndex, hourIndex }: Props) {
 	const [isDragOver, setIsDragOver] = useState(false);
-	const { onEventDrop } = useDashboard();
+	const {
+		onEventDrop,
+		setPanelAnchor,
+		selectedSlot,
+		editingEvent,
+		onClose,
+		suppressNextOpenRef,
+	} = useDashboard();
 
 	const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
@@ -32,10 +39,23 @@ export default function WeekCell({ onClick, dayIndex, hourIndex }: Props) {
 
 	return (
 		<div
-			className={`h-15 border-r border-b border-border hover:bg-muted/40 transition-colors
-				${isDragOver ? "bg-blue-100/50" : ""}
-			`}
-			onClick={onClick}
+			className={`h-15 border-r border-b border-border bg-background hover:bg-muted/60 transition-colors
+	${isDragOver ? "bg-primary/15" : ""}
+`}
+			onClick={(e) => {
+				if (suppressNextOpenRef.current) {
+					suppressNextOpenRef.current = false;
+					return;
+				}
+				if (selectedSlot || editingEvent) {
+					onClose();
+					setPanelAnchor(null);
+					return;
+				}
+				const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+				setPanelAnchor(rect);
+				onClick();
+			}}
 			onDragOver={handleDragOver}
 			onDragLeave={handleDragLeave}
 			onDrop={handleDrop}

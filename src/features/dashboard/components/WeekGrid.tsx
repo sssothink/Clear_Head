@@ -27,7 +27,7 @@ export default function WeekGrid() {
 
 	return (
 		<div className="flex-1">
-			<div className="relative">
+			<div className="relative bg-background">
 				<div className="grid grid-cols-7 grid-rows-24">
 					{hours.map((_, hourIndex) =>
 						days.map((_, dayIndex) => (
@@ -52,14 +52,14 @@ export default function WeekGrid() {
 
 				<div
 					style={{ top: `${currentTimeTop}px` }}
-					className="absolute -left-10 transform -translate-y-1/2 bg-red-500 text-white text-xs px-1 py-0.5 rounded z-10 pointer-events-none"
+					className="absolute -left-10 transform -translate-y-1/2 bg-primary text-white text-[11px] px-2 py-0.5 rounded-full z-10 pointer-events-none shadow"
 				>
 					{`${String(currentHour).padStart(2, "0")}:${String(currentMinute).padStart(2, "0")}`}
 				</div>
 
 				<div
 					style={{ top: `${currentTimeTop}px` }}
-					className="absolute left-0 right-0 h-0.5 bg-red-500 z-10 pointer-events-none"
+					className="absolute left-0 right-0 h-0.5 bg-primary/70 z-10 pointer-events-none"
 				></div>
 
 				<WeekEventsLayer />

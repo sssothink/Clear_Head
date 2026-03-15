@@ -22,9 +22,27 @@ export function useGoalEvents(initialEvents: DayEvent[]) {
 		setEvents((prev) => prev.filter((e) => e.id !== id));
 	};
 
+	const deleteEventsByGoalId = (goalId: string) => {
+		setEvents((prev) => prev.filter((e) => e.goal_id !== goalId));
+	};
+
 	const replaceEvent = (oldId: string, newId: string) => {
 		setEvents((prev) =>
 			prev.map((e) => (e.id === oldId ? { ...e, id: newId } : e)),
+		);
+	};
+
+	const replaceGoalId = (oldGoalId: string, newGoalId: string) => {
+		setEvents((prev) =>
+			prev.map((e) =>
+				e.goal_id === oldGoalId
+					? {
+							...e,
+							goal_id: newGoalId,
+							id: `${newGoalId}_${e.occurrence_date}`,
+						}
+					: e,
+			),
 		);
 	};
 
@@ -40,7 +58,9 @@ export function useGoalEvents(initialEvents: DayEvent[]) {
 		addEvent,
 		updateEvent,
 		deleteEvent,
+		deleteEventsByGoalId,
 		replaceEvent,
+		replaceGoalId,
 		restoreEvent,
 	};
 }

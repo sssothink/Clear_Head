@@ -2,9 +2,11 @@ import { useTransition } from "react";
 import { differenceInDays, format } from "date-fns";
 import {
 	createDayGoalAction,
+	deleteGoalOccurrenceAction,
 	deleteGoalAction,
 	setGoalOccurrenceStatusAction,
 	updateGoalAction,
+	updateGoalOccurrenceAction,
 } from "../server/actions";
 import { DayEvent, GoalStatus } from "../model/types";
 import { useRequestTracking } from "./useRequestTracking";
@@ -15,7 +17,9 @@ export function useGoalActions(
 		addEvent: (event: DayEvent) => void;
 		updateEvent: (id: string, updates: Partial<Omit<DayEvent, "id">>) => void;
 		deleteEvent: (id: string) => void;
+		deleteEventsByGoalId: (goalId: string) => void;
 		replaceEvent: (oldId: string, newId: string) => void;
+		replaceGoalId: (oldGoalId: string, newGoalId: string) => void;
 		restoreEvent: (event: DayEvent) => void;
 	},
 	weekStart: string,
@@ -25,37 +29,78 @@ export function useGoalActions(
 
 	const createGoal = (data: {
 		title: string;
+		description?: string;
 		start_time: string;
 		end_time: string;
 		date: string;
 		recurrence_type: "none" | "daily" | "weekly";
 		recurrence_days?: number[];
 	}) => {
-		const id = crypto.randomUUID();
-		const weekStartDate = new Date(weekStart);
-		const goalDate = new Date(data.date);
-		const dayIndex = differenceInDays(goalDate, weekStartDate);
+		const optimisticIds: string[] = [];
 
-		const optimistic: DayEvent = {
-			id,
-			title: data.title,
-			dayIndex: Math.max(0, Math.min(6, dayIndex)),
-			start_time: data.start_time,
-			end_time: data.end_time,
-			status: "planned",
+		const getWeekDates = (weekStart: string) => {
+			const base = new Date(weekStart);
+			const dates: string[] = [];
+			for (let i = 0; i < 7; i++) {
+				const d = new Date(base);
+				d.setDate(base.getDate() + i);
+				dates.push(format(d, "yyyy-MM-dd"));
+			}
+			return dates;
 		};
 
-		bumpVersion(id);
-		onEventsChange.addEvent(optimistic);
+		const tempGoalId = crypto.randomUUID();
+		const weekDates = getWeekDates(weekStart);
+
+		const addOptimisticEvent = (date: string, dayIndex: number) => {
+			const optimistic: DayEvent = {
+				id: `${tempGoalId}_${date}`,
+				goal_id: tempGoalId,
+				occurrence_date: date,
+				title: data.title,
+				description: data.description,
+				dayIndex,
+				start_time: data.start_time,
+				end_time: data.end_time,
+				status: "planned",
+				recurrence_type: data.recurrence_type,
+				recurrence_days: data.recurrence_days ?? null,
+			};
+
+			bumpVersion(optimistic.id);
+			optimisticIds.push(optimistic.id);
+			onEventsChange.addEvent(optimistic);
+		};
+
+		if (data.recurrence_type === "none") {
+			const dayIndex = differenceInDays(
+				new Date(data.date),
+				new Date(weekStart),
+			);
+			addOptimisticEvent(data.date, Math.max(0, Math.min(6, dayIndex)));
+		} else if (data.recurrence_type === "daily") {
+			weekDates.forEach((date, dayIndex) => {
+				addOptimisticEvent(date, dayIndex);
+			});
+		} else if (data.recurrence_type === "weekly") {
+			weekDates.forEach((date, dayIndex) => {
+				const d = new Date(date);
+				const weekDay = d.getDay();
+				const normalized = weekDay === 0 ? 7 : weekDay;
+				if (data.recurrence_days?.includes(normalized)) {
+					addOptimisticEvent(date, dayIndex);
+				}
+			});
+		}
 
 		startTransition(async () => {
 			try {
 				const created = await createDayGoalAction(data);
-				onEventsChange.replaceEvent(id, created.id);
-				clear(id);
-				bumpVersion(created.id);
+				onEventsChange.replaceGoalId(tempGoalId, created.id);
+				optimisticIds.forEach((oldId) => clear(oldId));
 			} catch {
-				onEventsChange.deleteEvent(id);
+				onEventsChange.deleteEventsByGoalId(tempGoalId);
+				optimisticIds.forEach((oldId) => clear(oldId));
 			}
 		});
 	};
@@ -85,7 +130,11 @@ export function useGoalActions(
 				goalDate.setDate(goalDate.getDate() + target.dayIndex);
 				const formattedDate = format(goalDate, "yyyy-MM-dd");
 
-				await setGoalOccurrenceStatusAction(goalId, formattedDate, newStatus);
+				await setGoalOccurrenceStatusAction(
+					target.goal_id,
+					formattedDate,
+					newStatus,
+				);
 			} catch {
 				if (isLatest(goalId, version)) {
 					onEventsChange.updateEvent(goalId, { status: previous });
@@ -115,6 +164,7 @@ export function useGoalActions(
 				if (isLatest(goalId, version)) {
 					onEventsChange.updateEvent(goalId, {
 						title: previous.title,
+						description: previous.description,
 						dayIndex: previous.dayIndex,
 						start_time: previous.start_time,
 						end_time: previous.end_time,
@@ -126,20 +176,113 @@ export function useGoalActions(
 		});
 	};
 
-	const deleteGoal = (goalId: string) => {
-		const backup = events.find((e) => e.id === goalId);
-		if (!backup) return;
+	const updateGoalOccurrence = (
+		goalId: string,
+		date: string,
+		data: Partial<Omit<DayEvent, "id" | "status">>,
+	) => {
+		const target = events.find(
+			(e) => e.goal_id === goalId && e.occurrence_date === date,
+		);
+		if (!target) return;
 
-		const version = bumpVersion(goalId);
+		const previous = { ...target };
+		const version = bumpVersion(target.id);
 
-		onEventsChange.deleteEvent(goalId);
+		onEventsChange.updateEvent(target.id, data);
 
 		startTransition(async () => {
 			try {
-				await deleteGoalAction(goalId);
+				const dataForServer = { ...data };
+				delete dataForServer.dayIndex;
+				delete dataForServer.goal_id;
+				delete dataForServer.occurrence_date;
+
+				await updateGoalOccurrenceAction(goalId, date, dataForServer);
 			} catch {
-				if (isLatest(goalId, version)) {
+				if (isLatest(target.id, version)) {
+					onEventsChange.updateEvent(target.id, {
+						title: previous.title,
+						description: previous.description,
+						dayIndex: previous.dayIndex,
+						start_time: previous.start_time,
+						end_time: previous.end_time,
+						start_date: previous.start_date,
+					});
+				}
+			}
+		});
+	};
+
+	const updateGoalSeries = (
+		goalId: string,
+		data: Partial<Omit<DayEvent, "id" | "status">>,
+	) => {
+		const targets = events.filter((e) => e.goal_id === goalId);
+		if (targets.length === 0) return;
+
+		const previous = targets.map((e) => ({ ...e }));
+		targets.forEach((e) => onEventsChange.updateEvent(e.id, data));
+
+		startTransition(async () => {
+			try {
+				const dataForServer = { ...data };
+				delete dataForServer.dayIndex;
+				delete dataForServer.goal_id;
+				delete dataForServer.occurrence_date;
+				await updateGoalAction(goalId, dataForServer);
+			} catch {
+				previous.forEach((prev) => {
+					onEventsChange.updateEvent(prev.id, {
+						title: prev.title,
+						description: prev.description,
+						dayIndex: prev.dayIndex,
+						start_time: prev.start_time,
+						end_time: prev.end_time,
+						start_date: prev.start_date,
+					});
+				});
+			}
+		});
+	};
+
+	const deleteGoal = (goalId: string) => {
+		const backup = events.find(
+			(e) => e.goal_id === goalId || e.id === goalId,
+		);
+		if (!backup) return;
+
+		const version = bumpVersion(backup.id);
+
+		onEventsChange.deleteEventsByGoalId(backup.goal_id);
+
+		startTransition(async () => {
+			try {
+				await deleteGoalAction(backup.goal_id);
+			} catch {
+				if (isLatest(backup.id, version)) {
 					onEventsChange.restoreEvent(backup);
+				}
+			}
+		});
+	};
+
+	const deleteGoalOccurrence = (goalId: string, date: string) => {
+		const target = events.find(
+			(e) => e.goal_id === goalId && e.occurrence_date === date,
+		);
+		if (!target) return;
+
+		const version = bumpVersion(target.id);
+
+		onEventsChange.deleteEvent(target.id);
+
+		startTransition(async () => {
+			try {
+				await deleteGoalOccurrenceAction(goalId, date);
+			} catch {
+				if (isLatest(target.id, version)) {
+					onEventsChange.restoreEvent(target);
 				}
 			}
 		});
@@ -151,6 +294,9 @@ export function useGoalActions(
 		toggleComplete,
 		setStatus,
 		updateGoal,
+		updateGoalOccurrence,
+		updateGoalSeries,
+		deleteGoalOccurrence,
 		deleteGoal,
 	};
 }

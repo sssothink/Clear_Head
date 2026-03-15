@@ -66,10 +66,7 @@ export default function DayForm({
 	};
 
 	return (
-		<form
-			onSubmit={handleSubmit}
-			className="glass p-4 rounded-2xl flex flex-col gap-3 mb-3"
-		>
+		<form onSubmit={handleSubmit} className="card p-4 flex flex-col gap-3 mb-3">
 			<Input
 				value={title}
 				onChange={(e) => setTitle(e.target.value)}

@@ -31,8 +31,7 @@ export async function getGoalOverrides(userId: string, date: string) {
 		.from("goal_occurrences")
 		.select("*")
 		.eq("owner_id", userId)
-		.eq("date", date)
-		.eq("is_deleted", false);
+		.eq("date", date);
 }
 
 // export async function getWeekEvents(baseDate: string) {

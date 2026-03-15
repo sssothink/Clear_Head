@@ -1,16 +1,24 @@
 "use client";
 
 import { cn } from "@/shared/lib/cn";
-import { Button } from "@/shared/ui/button";
-import { Check, Pen, Trash, X } from "lucide-react";
 import { useDashboard } from "../context/DashboardContext";
 import { useState } from "react";
+import { toHHMM } from "@/lib/utils";
 
 const HOUR_HEIGHT = 60;
 const MINUTE_HEIGHT = HOUR_HEIGHT / 60;
 
 export default function WeekEventsLayer() {
-	const { events, onToggle, onDelete, onEdit } = useDashboard();
+	const {
+		events,
+		onToggle,
+		onEdit,
+		onClose,
+		selectedSlot,
+		editingEvent,
+		setPanelAnchor,
+		suppressNextOpenRef,
+	} = useDashboard();
 	const [draggedEventId, setDraggedEventId] = useState<string | null>(null);
 
 	const handleDragStart = (
@@ -39,7 +47,14 @@ export default function WeekEventsLayer() {
 				const durationMinutes =
 					endHour * 60 + endMinute - (startHour * 60 + startMinute);
 
-				const height = durationMinutes * MINUTE_HEIGHT;
+				const snappedDurationMinutes = Math.max(
+					15,
+					Math.round(durationMinutes / 15) * 15,
+				);
+				const height = snappedDurationMinutes * MINUTE_HEIGHT;
+				const showMeta = height >= 44;
+				const showStatus = height >= 64;
+				const isCompact = height < 28;
 
 				return (
 					<div
@@ -47,9 +62,28 @@ export default function WeekEventsLayer() {
 						draggable
 						onDragStart={(e) => handleDragStart(e, event.id)}
 						onDragEnd={handleDragEnd}
+						onClick={(e) => {
+							if (suppressNextOpenRef.current) {
+								suppressNextOpenRef.current = false;
+								return;
+							}
+
+							if (selectedSlot || editingEvent) {
+								onClose();
+								setPanelAnchor(null);
+								return;
+							}
+
+							const rect = (
+								e.currentTarget as HTMLElement
+							).getBoundingClientRect();
+							setPanelAnchor(rect);
+							onEdit(event.id);
+						}}
 						className={cn(
 							"event absolute pointer-events-auto justify-between p-3 transition-all group",
-							event.status === "completed" && "opacity-60",
+							isCompact && "event--compact",
+							event.status === "completed" && "event--completed",
 							draggedEventId === event.id && "opacity-40 scale-90",
 						)}
 						style={{
@@ -59,38 +93,32 @@ export default function WeekEventsLayer() {
 							width: `${100 / 7}%`,
 						}}
 					>
-						<div className="flex gap-1">
-							<Button
-								size="xs"
-								variant="ghost"
-								onClick={() => onToggle(event.id)}
-								className="border-2 rounded-[0.6em] cursor-pointer active:scale-97"
-							>
-								{event.status === "planned" ? (
-									<Check size={10} />
-								) : (
-									<X size={10} />
+						<div className="flex items-start justify-between gap-2">
+							<div className="min-w-0 flex-1">
+								<div className="event-header">
+									<input
+										type="checkbox"
+										className="event-checkbox"
+										checked={event.status === "completed"}
+										onChange={(e) => {
+											e.stopPropagation();
+											onToggle(event.id);
+										}}
+										onClick={(e) => e.stopPropagation()}
+									/>
+									<div className="event-title">{event.title}</div>
+								</div>
+								{showMeta && (
+									<div className="event-meta">
+										{toHHMM(event.start_time)}-{toHHMM(event.end_time)}
+									</div>
 								)}
-							</Button>
-							<div className="p-1 text-xs text-white truncate">
-								{event.title}
+								{showStatus && (
+									<div className="event-status">
+										{event.status === "planned" ? "Planned" : "Done"}
+									</div>
+								)}
 							</div>
-							<Button
-								size="xs"
-								variant="ghost"
-								onClick={() => onEdit(event.id)}
-								className="border-2 rounded-[0.6em] cursor-pointer active:scale-97"
-							>
-								<Pen size={10}></Pen>
-							</Button>
-							<Button
-								size="xs"
-								variant="ghost"
-								onClick={() => onDelete(event.id)}
-								className="border-2 rounded-[0.6em] cursor-pointer active:scale-97"
-							>
-								<Trash size={10}></Trash>
-							</Button>
 						</div>
 					</div>
 				);

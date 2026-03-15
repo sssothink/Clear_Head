@@ -4,8 +4,15 @@ import React, {
 	useMemo,
 	useState,
 	useCallback,
+	useRef,
 } from "react";
-import { DayEvent, Goal, SelectedSlot } from "../../goals/model/types";
+import {
+	DayEvent,
+	Goal,
+	GoalOccurrence,
+	GoalStatus,
+	SelectedSlot,
+} from "../../goals/model/types";
 import { useOptimisticGoals } from "../../goals/hooks/useOptimisticGoals";
 import { buildWeekEvents } from "@/lib/week/build-week-events";
 import { addDays, format } from "date-fns";
@@ -22,6 +29,7 @@ export type DashboardContextType = {
 	onEdit: (id: string) => void;
 	onSubmit: (data: {
 		title: string;
+		description?: string;
 		start_time: string;
 		end_time: string;
 		date: string;
@@ -39,6 +47,11 @@ export type DashboardContextType = {
 
 	onToggle: (id: string) => void;
 	onDelete: (id: string) => void;
+	onDeleteOccurrence: (goalId: string, date: string) => void;
+
+	panelAnchor: DOMRect | null;
+	setPanelAnchor: (rect: DOMRect | null) => void;
+	suppressNextOpenRef: React.MutableRefObject<boolean>;
 };
 
 const DashboardContext = createContext<DashboardContextType | null>(null);
@@ -53,19 +66,23 @@ export function useDashboard() {
 
 export function DashboardProvider({
 	initialGoals,
+	initialOccurrences,
 	weekStart,
 	children,
 }: {
 	initialGoals: Goal[];
+	initialOccurrences: GoalOccurrence[];
 	weekStart: string;
 	children: React.ReactNode;
 }) {
 	const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
 	const [editingEvent, setEditingEvent] = useState<DayEvent | null>(null);
+	const [panelAnchor, setPanelAnchor] = useState<DOMRect | null>(null);
+	const suppressNextOpenRef = useRef(false);
 
 	const baseEvents = useMemo(
-		() => buildWeekEvents(initialGoals, weekStart),
-		[initialGoals, weekStart],
+		() => buildWeekEvents(initialGoals, weekStart, initialOccurrences),
+		[initialGoals, weekStart, initialOccurrences],
 	);
 
 	const {
@@ -74,6 +91,9 @@ export function DashboardProvider({
 		createGoal,
 		toggleComplete,
 		deleteGoal,
+		deleteGoalOccurrence,
+		updateGoalOccurrence,
+		updateGoalSeries,
 		updateGoal,
 	} = useOptimisticGoals(baseEvents, weekStart);
 
@@ -103,24 +123,59 @@ export function DashboardProvider({
 			recurrence_days?: number[];
 		}) => {
 			if (editingEvent) {
-				updateGoal(editingEvent.id, {
-					title: data.title,
-					start_time: data.start_time,
-					end_time: data.end_time,
-				});
+				const isRecurring = editingEvent.recurrence_type !== "none";
+
+				if (!isRecurring) {
+					updateGoal(editingEvent.id, {
+						title: data.title,
+						start_time: data.start_time,
+						end_time: data.end_time,
+					});
+					setEditingEvent(null);
+					return;
+				}
+
+				const updateAll = window.confirm("Update all occurrences?");
+				if (updateAll) {
+					updateGoalSeries(editingEvent.goal_id, {
+						title: data.title,
+						start_time: data.start_time,
+						end_time: data.end_time,
+					});
+				} else {
+					updateGoalOccurrence(
+						editingEvent.goal_id,
+						editingEvent.occurrence_date,
+						{
+							title: data.title,
+							start_time: data.start_time,
+							end_time: data.end_time,
+						},
+					);
+				}
+
 				setEditingEvent(null);
+				return;
 			} else {
 				if (!selectedSlot) return;
 				createGoal({ ...data, date: selectedSlot.date });
 				setSelectedSlot(null);
 			}
 		},
-		[createGoal, selectedSlot, editingEvent, updateGoal],
+		[
+			createGoal,
+			selectedSlot,
+			editingEvent,
+			updateGoal,
+			updateGoalOccurrence,
+			updateGoalSeries,
+		],
 	);
 
 	const handleClose = useCallback(() => {
 		setSelectedSlot(null);
 		setEditingEvent(null);
+		setPanelAnchor(null);
 	}, []);
 
 	const handleEventDrop = useCallback(
@@ -176,6 +231,11 @@ export function DashboardProvider({
 
 			onToggle: toggleComplete,
 			onDelete: deleteGoal,
+			onDeleteOccurrence: deleteGoalOccurrence,
+
+			panelAnchor,
+			setPanelAnchor,
+			suppressNextOpenRef,
 		}),
 		[
 			events,
@@ -190,6 +250,10 @@ export function DashboardProvider({
 			handleEventDrop,
 			toggleComplete,
 			deleteGoal,
+			deleteGoalOccurrence,
+			panelAnchor,
+			setPanelAnchor,
+			suppressNextOpenRef,
 		],
 	);
 

@@ -19,22 +19,34 @@ export function useOptimisticGoals(
 		addEvent,
 		updateEvent,
 		deleteEvent,
+		deleteEventsByGoalId,
 		replaceEvent,
+		replaceGoalId,
 		restoreEvent,
 	} = useGoalEvents(initialEvents);
 
-	const { isPending, createGoal, toggleComplete, updateGoal, deleteGoal } =
-		useGoalActions(
-			events,
-			{
-				addEvent,
-				updateEvent,
-				deleteEvent,
-				replaceEvent,
-				restoreEvent,
-			},
-			weekStart,
-		);
+	const {
+		isPending,
+		createGoal,
+		toggleComplete,
+		updateGoal,
+		updateGoalOccurrence,
+		updateGoalSeries,
+		deleteGoalOccurrence,
+		deleteGoal,
+	} = useGoalActions(
+		events,
+		{
+			addEvent,
+			updateEvent,
+			deleteEvent,
+			deleteEventsByGoalId,
+			replaceEvent,
+			replaceGoalId,
+			restoreEvent,
+		},
+		weekStart,
+	);
 
 	return {
 		events,
@@ -42,6 +54,10 @@ export function useOptimisticGoals(
 		createGoal,
 		toggleComplete,
 		updateGoal,
+		updateGoalOccurrence,
+		updateGoalSeries,
+		deleteGoalOccurrence,
+		replaceGoalId,
 		deleteGoal,
 	};
 }
