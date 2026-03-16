@@ -92,8 +92,9 @@ export function DashboardProvider({
 		toggleComplete,
 		deleteGoal,
 		deleteGoalOccurrence,
-		updateGoalOccurrence,
 		updateGoalSeries,
+		detachGoalOccurrence,
+		detachGoalOccurrenceWithMove,
 		updateGoal,
 	} = useOptimisticGoals(baseEvents, weekStart);
 
@@ -116,6 +117,7 @@ export function DashboardProvider({
 	const handleSubmit = useCallback(
 		(data: {
 			title: string;
+			description?: string;
 			start_time: string;
 			end_time: string;
 			date: string;
@@ -126,8 +128,9 @@ export function DashboardProvider({
 				const isRecurring = editingEvent.recurrence_type !== "none";
 
 				if (!isRecurring) {
-					updateGoal(editingEvent.id, {
+					updateGoal(editingEvent.goal_id, {
 						title: data.title,
+						description: data.description,
 						start_time: data.start_time,
 						end_time: data.end_time,
 					});
@@ -139,15 +142,18 @@ export function DashboardProvider({
 				if (updateAll) {
 					updateGoalSeries(editingEvent.goal_id, {
 						title: data.title,
+						description: data.description,
 						start_time: data.start_time,
 						end_time: data.end_time,
 					});
 				} else {
-					updateGoalOccurrence(
+					detachGoalOccurrence(
 						editingEvent.goal_id,
+						editingEvent.occurrence_date,
 						editingEvent.occurrence_date,
 						{
 							title: data.title,
+							description: data.description,
 							start_time: data.start_time,
 							end_time: data.end_time,
 						},
@@ -167,8 +173,8 @@ export function DashboardProvider({
 			selectedSlot,
 			editingEvent,
 			updateGoal,
-			updateGoalOccurrence,
 			updateGoalSeries,
+			detachGoalOccurrence,
 		],
 	);
 
@@ -203,7 +209,24 @@ export function DashboardProvider({
 			const newDate = addDays(weekStartDate, newDayIndex);
 			const newDateStr = format(newDate, "yyyy-MM-dd");
 
-			updateGoal(eventId, {
+			const isRecurring = event.recurrence_type !== "none";
+
+			if (isRecurring) {
+				detachGoalOccurrenceWithMove(
+					event.goal_id,
+					event.occurrence_date,
+					newDateStr,
+					newDayIndex,
+					{
+						title: event.title,
+						description: event.description,
+						start_time: newStartTime,
+						end_time: newEndTime,
+					},
+				);
+				return;
+			}
+			updateGoal(event.goal_id, {
 				dayIndex: newDayIndex,
 				start_time: newStartTime,
 				end_time: newEndTime,
@@ -211,7 +234,7 @@ export function DashboardProvider({
 				title: event.title,
 			});
 		},
-		[events, updateGoal, weekStart],
+		[events, updateGoal, weekStart, detachGoalOccurrenceWithMove],
 	);
 
 	const value = useMemo<DashboardContextType>(

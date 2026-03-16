@@ -127,3 +127,55 @@ export async function updateGoalOccurrenceAction(
 
 	if (error) throw error;
 }
+
+export async function detachGoalOccurrenceAction(params: {
+	goalId: string;
+	oldDate: string;
+	newDate: string;
+	title: string;
+	description?: string;
+	start_time?: string;
+	end_time?: string;
+}) {
+	const supabase = await createSupabaseServerClient();
+	const user = await getCurrentUser();
+
+	const { data: created, error: createError } = await supabase
+		.from("goals")
+		.insert({
+			title: params.title,
+			owner_id: user.id,
+			start_date: params.newDate,
+			description: params.description,
+			recurrence_type: "none",
+			recurrence_days: null,
+			start_time: params.start_time,
+			end_time: params.end_time,
+		})
+		.select("id")
+		.single();
+
+	if (createError) {
+		console.error("SUPABASE INSERT ERROR:", createError);
+		throw createError;
+	}
+
+	const { error: occError } = await supabase.from("goal_occurrences").upsert(
+		{
+			goal_id: params.goalId,
+			owner_id: user.id,
+			date: params.oldDate,
+			is_deleted: true,
+		},
+		{
+			onConflict: "goal_id,date",
+		},
+	);
+
+	if (occError) {
+		console.error("SUPABASE STATUS UPDATE ERROR:", occError);
+		throw new Error("Failed to update goal status");
+	}
+
+	return created;
+}

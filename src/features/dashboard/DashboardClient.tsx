@@ -70,6 +70,8 @@ function DashboardContent() {
 									description: editingEvent.description,
 									start_time: editingEvent.start_time,
 									end_time: editingEvent.end_time,
+									recurrence_type: editingEvent.recurrence_type,
+									recurrence_days: editingEvent.recurrence_days,
 									date: format(
 										addDays(new Date(weekStart), editingEvent.dayIndex),
 										"yyyy-MM-dd",

@@ -46,6 +46,20 @@ export function useGoalEvents(initialEvents: DayEvent[]) {
 		);
 	};
 
+	const replaceEventAndGoalId = (oldId: string, newId: string) => {
+		setEvents((prev) =>
+			prev.map((e) =>
+				e.id === oldId
+					? {
+							...e,
+							id: newId,
+							goal_id: newId,
+						}
+					: e,
+			),
+		);
+	};
+
 	const restoreEvent = (event: DayEvent) => {
 		setEvents((prev) =>
 			[...prev, event].sort((a, b) => a.start_time.localeCompare(b.start_time)),
@@ -59,6 +73,7 @@ export function useGoalEvents(initialEvents: DayEvent[]) {
 		updateEvent,
 		deleteEvent,
 		deleteEventsByGoalId,
+		replaceEventAndGoalId,
 		replaceEvent,
 		replaceGoalId,
 		restoreEvent,

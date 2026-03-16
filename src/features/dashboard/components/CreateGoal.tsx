@@ -26,6 +26,8 @@ type GoalModalProps = {
 		start_time: string;
 		end_time: string;
 		date: string;
+		recurrence_type?: "none" | "daily" | "weekly";
+		recurrence_days?: number[] | null;
 	};
 	panelAnchor?: DOMRect | null;
 };
@@ -57,9 +59,11 @@ export default function CreateGoal({
 	const [startTime, setStartTime] = useState(startHour);
 	const [endTime, setEndTime] = useState(endHour);
 	const [recurrence, setRecurrence] = useState<"none" | "daily" | "weekly">(
-		"none",
+		initialData?.recurrence_type ?? "none",
 	);
-	const [recurrenceDays, setRecurrenceDays] = useState<number[]>([]);
+	const [recurrenceDays, setRecurrenceDays] = useState<number[]>(
+		initialData?.recurrence_days ?? [],
+	);
 
 	const [timePanelOpen, setTimePanelOpen] = useState(false);
 	const [timePanelPos, setTimePanelPos] = useState({ top: 0, left: 0 });
@@ -157,13 +161,7 @@ export default function CreateGoal({
 					}}
 				>
 					{date || "Pick date"} • {toHHMM(startTime)} - {toHHMM(endTime)}
-					<span className="goal-repeat">
-						{recurrence === "none"
-							? "No repeat"
-							: recurrence === "daily"
-								? "Daily"
-								: "Weekly"}
-					</span>
+					<span className="goal-repeat">{recurrence}</span>
 				</button>
 			</div>
 
@@ -214,11 +212,7 @@ export default function CreateGoal({
 						>
 							Delete only this
 						</Button>
-						<Button
-							className="goal-delete"
-							type="button"
-							onClick={onDeleteAll}
-						>
+						<Button className="goal-delete" type="button" onClick={onDeleteAll}>
 							Delete all
 						</Button>
 					</div>
@@ -296,24 +290,27 @@ export default function CreateGoal({
 
 						{recurrence === "weekly" && (
 							<div className="goal-weekdays">
-								{["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
-									(label, i) => (
-										<label key={label} className="goal-weekday">
-											<input
-												type="checkbox"
-												checked={recurrenceDays.includes(i)}
-												onChange={() =>
-													setRecurrenceDays((prev) =>
-														prev.includes(i)
-															? prev.filter((day) => day !== i)
-															: [...prev, i],
-													)
-												}
-											/>
-											<span>{label}</span>
-										</label>
-									),
-								)}
+							{["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
+								(label, i) => {
+									const dayValue = i + 1;
+									return (
+									<label key={label} className="goal-weekday">
+										<input
+											type="checkbox"
+											checked={recurrenceDays.includes(dayValue)}
+											onChange={() =>
+												setRecurrenceDays((prev) =>
+													prev.includes(dayValue)
+														? prev.filter((day) => day !== dayValue)
+														: [...prev, dayValue],
+												)
+											}
+										/>
+										<span>{label}</span>
+									</label>
+									);
+								},
+							)}
 							</div>
 						)}
 					</div>
