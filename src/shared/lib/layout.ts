@@ -4,15 +4,20 @@ import {
 	timeToMinutes,
 } from "./time";
 
-export const HOUR_HEIGHT = 60;
-export const MINUTE_HEIGHT = HOUR_HEIGHT / 60;
+export const DEFAULT_HOUR_HEIGHT = 60;
 export const MIN_EVENT_HEIGHT = 15;
 
-export function getCurrentTimeTop(now: Date) {
-	return now.getHours() * HOUR_HEIGHT + now.getMinutes() + MINUTE_HEIGHT;
+export function getCurrentTimeTop(now: Date, hourHeight = DEFAULT_HOUR_HEIGHT) {
+	const minuteHeight = hourHeight / 60;
+	return now.getHours() * hourHeight + now.getMinutes() + minuteHeight;
 }
 
-export function getEventLayout(startTime: string, endTime: string) {
+export function getEventLayout(
+	startTime: string,
+	endTime: string,
+	hourHeight = DEFAULT_HOUR_HEIGHT,
+) {
+	const minuteHeight = hourHeight / 60;
 	const startMinutes = timeToMinutes(startTime);
 	const durationMinutes = getDurationMinutes(startTime, endTime);
 
@@ -22,8 +27,8 @@ export function getEventLayout(startTime: string, endTime: string) {
 	);
 
 	return {
-		top: startMinutes * MINUTE_HEIGHT,
-		height: snappedDurationMinutes * MINUTE_HEIGHT,
+		top: startMinutes * minuteHeight,
+		height: snappedDurationMinutes * minuteHeight,
 		durationMinutes,
 	};
 }

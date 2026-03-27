@@ -17,6 +17,7 @@ export default function WeekEventsOverlay() {
 		editingEvent,
 		setPanelAnchor,
 		suppressNextOpenRef,
+		hourHeight,
 	} = useDashboard();
 	const [draggedEventId, setDraggedEventId] = useState<string | null>(null);
 
@@ -39,6 +40,7 @@ export default function WeekEventsOverlay() {
 				const { top, height } = getEventLayout(
 					event.start_time,
 					event.end_time,
+					hourHeight,
 				);
 
 				const isRecurring =
@@ -48,9 +50,9 @@ export default function WeekEventsOverlay() {
 					event.recurrence_type === "weekly"
 						? "Repeats weekly"
 						: "Repeats daily";
-				const showMeta = height >= 44;
-				const showStatus = height >= 64;
-				const isCompact = height < 28;
+				const showMeta = height >= Math.max(36, hourHeight * 0.7);
+				const showStatus = height >= Math.max(52, hourHeight * 1.05);
+				const isCompact = height < Math.max(24, hourHeight * 0.45);
 
 				return (
 					<div

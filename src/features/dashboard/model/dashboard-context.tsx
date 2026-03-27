@@ -4,6 +4,8 @@ import React, {
 	createContext,
 	useContext,
 	useMemo,
+	useState,
+	useEffect,
 } from "react";
 import {
 	DayEvent,
@@ -50,6 +52,8 @@ export type DashboardContextType = {
 	onDelete: (id: string) => void;
 	onDeleteOccurrence: (goalId: string, date: string) => void;
 
+	hourHeight: number;
+	setHourHeight: React.Dispatch<React.SetStateAction<number>>;
 	panelAnchor: DOMRect | null;
 	setPanelAnchor: (rect: DOMRect | null) => void;
 	suppressNextOpenRef: React.MutableRefObject<boolean>;
@@ -76,6 +80,19 @@ export function DashboardProvider({
 	weekStart: string;
 	children: React.ReactNode;
 }) {
+	const [hourHeight, setHourHeight] = useState(60);
+
+	useEffect(() => {
+		const raw = window.localStorage.getItem("calendar-hour-height");
+		if (!raw) return;
+		const n = Number(raw);
+		if (Number.isFinite(n)) setHourHeight(n);
+	}, []);
+
+	useEffect(() => {
+		window.localStorage.setItem("calendar-hour-height", String(hourHeight));
+	}, [hourHeight]);
+
 	const {
 		selectedSlot,
 		setSelectedSlot,
@@ -139,6 +156,8 @@ export function DashboardProvider({
 			onDelete: deleteGoal,
 			onDeleteOccurrence: deleteGoalOccurrence,
 
+			hourHeight,
+			setHourHeight,
 			panelAnchor,
 			setPanelAnchor,
 			suppressNextOpenRef,

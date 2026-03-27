@@ -16,6 +16,7 @@ export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 		editingEvent,
 		onClose,
 		suppressNextOpenRef,
+		hourHeight,
 	} = useDashboard();
 
 	const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -39,9 +40,10 @@ export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 
 	return (
 		<div
-			className={`h-15 border-r border-b border-border bg-background hover:bg-muted/60 transition-colors
-	${isDragOver ? "bg-primary/15" : ""}
-`}
+			style={{ height: hourHeight }}
+			className={`border-r border-b border-border bg-background hover:bg-muted/60 transition-colors
+				${isDragOver ? "bg-primary/15" : ""}
+			`}
 			onClick={(e) => {
 				if (suppressNextOpenRef.current) {
 					suppressNextOpenRef.current = false;
