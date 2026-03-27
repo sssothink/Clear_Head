@@ -1,16 +1,15 @@
-import DashboardClient from "@/features/dashboard/DashboardClient";
-
+import { DashboardScreen } from "@/features/dashboard";
 import { getWeekGoals } from "@/lib/week/get-week-goals";
-import { format } from "date-fns";
+import { formatISODate } from "@/shared/lib/date";
 
 const DashboardPage = async () => {
 	const { goals, weekStart, occurrences } = await getWeekGoals(new Date());
 
 	return (
-		<DashboardClient
+		<DashboardScreen
 			initialGoals={goals}
 			initialOccurrences={occurrences}
-			weekStart={format(weekStart, "yyyy-MM-dd")}
+			weekStart={formatISODate(weekStart)}
 		/>
 	);
 };

@@ -1,5 +1,5 @@
 import { useTransition } from "react";
-import { differenceInDays, format } from "date-fns";
+import { differenceInDays } from "date-fns";
 import {
 	createDayGoalAction,
 	deleteGoalOccurrenceAction,
@@ -8,9 +8,13 @@ import {
 	updateGoalAction,
 	updateGoalOccurrenceAction,
 	detachGoalOccurrenceAction,
+	splitGoalSeriesFromDateAction,
 } from "../server/actions";
-import { DayEvent, GoalStatus } from "../model/types";
+import { DayEvent, GoalStatus, RecurrenceType } from "../model/types";
 import { useRequestTracking } from "./useRequestTracking";
+import { formatISODate } from "@/shared/lib/date";
+import { toNormalizedWeekday } from "@/shared/lib/recurrence";
+import { useRouter } from "next/navigation";
 
 export function useGoalActions(
 	events: DayEvent[],
@@ -19,16 +23,64 @@ export function useGoalActions(
 		updateEvent: (id: string, updates: Partial<Omit<DayEvent, "id">>) => void;
 		deleteEvent: (id: string) => void;
 		deleteEventsByGoalId: (goalId: string) => void;
-		replaceEvent: (oldId: string, newId: string) => void;
 		replaceGoalId: (oldGoalId: string, newGoalId: string) => void;
 		replaceEventAndGoalId: (oldId: string, newId: string) => void;
-
 		restoreEvent: (event: DayEvent) => void;
 	},
 	weekStart: string,
 ) {
 	const [isPending, startTransition] = useTransition();
 	const { bumpVersion, isLatest, clear } = useRequestTracking();
+	const router = useRouter();
+
+	type EventUpdateInput = Partial<Omit<DayEvent, "id" | "status">>;
+
+	type DetachPatch = {
+		title: string;
+		description?: string;
+		start_time: string;
+		end_time: string;
+	};
+
+	type DetachOccurrenceParams = {
+		event: DayEvent;
+		newDate: string;
+		patch: DetachPatch;
+		newDayIndex?: number;
+	};
+
+	const omitKeys = <T extends Record<string, unknown>>(
+		value: T,
+		keysToOmit: readonly string[],
+	) =>
+		Object.fromEntries(
+			Object.entries(value).filter(([key]) => !keysToOmit.includes(key)),
+		);
+
+	const toGoalUpdatePayload = (data: EventUpdateInput) => {
+		return omitKeys(data, ["dayIndex", "goal_id", "occurrence_date"]);
+	};
+
+	const toOccurrenceUpdatePayload = (data: EventUpdateInput) => {
+		return omitKeys(data, [
+			"dayIndex",
+			"goal_id",
+			"start_date",
+			"occurrence_date",
+		]);
+	};
+
+	const buildRollbackPatch = (prev: DayEvent, includeStatus = false) => {
+		const base = {
+			title: prev.title,
+			description: prev.description,
+			dayIndex: prev.dayIndex,
+			start_time: prev.start_time,
+			end_time: prev.end_time,
+			start_date: prev.start_date,
+		};
+		return includeStatus ? { ...base, status: prev.status } : base;
+	};
 
 	const createGoal = (data: {
 		title: string;
@@ -36,7 +88,7 @@ export function useGoalActions(
 		start_time: string;
 		end_time: string;
 		date: string;
-		recurrence_type: "none" | "daily" | "weekly";
+		recurrence_type: RecurrenceType;
 		recurrence_days?: number[];
 	}) => {
 		const optimisticIds: string[] = [];
@@ -47,7 +99,7 @@ export function useGoalActions(
 			for (let i = 0; i < 7; i++) {
 				const d = new Date(base);
 				d.setDate(base.getDate() + i);
-				dates.push(format(d, "yyyy-MM-dd"));
+				dates.push(formatISODate(d));
 			}
 			return dates;
 		};
@@ -83,13 +135,13 @@ export function useGoalActions(
 			addOptimisticEvent(data.date, Math.max(0, Math.min(6, dayIndex)));
 		} else if (data.recurrence_type === "daily") {
 			weekDates.forEach((date, dayIndex) => {
+				if (date < data.date) return;
 				addOptimisticEvent(date, dayIndex);
 			});
 		} else if (data.recurrence_type === "weekly") {
 			weekDates.forEach((date, dayIndex) => {
-				const d = new Date(date);
-				const weekDay = d.getDay();
-				const normalized = weekDay === 0 ? 7 : weekDay;
+				if (date < data.date) return;
+				const normalized = toNormalizedWeekday(new Date(date));
 				if (data.recurrence_days?.includes(normalized)) {
 					addOptimisticEvent(date, dayIndex);
 				}
@@ -131,7 +183,7 @@ export function useGoalActions(
 			try {
 				const goalDate = new Date(weekStart);
 				goalDate.setDate(goalDate.getDate() + target.dayIndex);
-				const formattedDate = format(goalDate, "yyyy-MM-dd");
+				const formattedDate = formatISODate(goalDate);
 
 				await setGoalOccurrenceStatusAction(
 					target.goal_id,
@@ -146,10 +198,7 @@ export function useGoalActions(
 		});
 	};
 
-	const updateGoal = (
-		goalId: string,
-		data: Partial<Omit<DayEvent, "id" | "status">>,
-	) => {
+	const updateGoal = (goalId: string, data: EventUpdateInput) => {
 		const target = events.find((e) => e.goal_id === goalId || e.id === goalId);
 		if (!target) return;
 
@@ -160,23 +209,13 @@ export function useGoalActions(
 
 		startTransition(async () => {
 			try {
-				const dataForServer = { ...data };
-				delete dataForServer.dayIndex;
-				delete dataForServer.goal_id;
-				delete dataForServer.occurrence_date;
-
-				await updateGoalAction(target.goal_id, dataForServer);
+				await updateGoalAction(target.goal_id, toGoalUpdatePayload(data));
 			} catch {
 				if (isLatest(target.id, version)) {
-					onEventsChange.updateEvent(target.id, {
-						title: previous.title,
-						description: previous.description,
-						dayIndex: previous.dayIndex,
-						start_time: previous.start_time,
-						end_time: previous.end_time,
-						start_date: previous.start_date,
-						status: previous.status,
-					});
+					onEventsChange.updateEvent(
+						target.id,
+						buildRollbackPatch(previous, true),
+					);
 				}
 			}
 		});
@@ -185,7 +224,7 @@ export function useGoalActions(
 	const updateGoalOccurrence = (
 		goalId: string,
 		date: string,
-		data: Partial<Omit<DayEvent, "id" | "status">>,
+		data: EventUpdateInput,
 	) => {
 		const target = events.find(
 			(e) => e.goal_id === goalId && e.occurrence_date === date,
@@ -199,32 +238,20 @@ export function useGoalActions(
 
 		startTransition(async () => {
 			try {
-				const dataForServer = { ...data };
-				delete dataForServer.dayIndex;
-				delete dataForServer.goal_id;
-				delete dataForServer.start_date;
-				delete dataForServer.occurrence_date;
-
-				await updateGoalOccurrenceAction(goalId, date, dataForServer);
+				await updateGoalOccurrenceAction(
+					goalId,
+					date,
+					toOccurrenceUpdatePayload(data),
+				);
 			} catch {
 				if (isLatest(target.id, version)) {
-					onEventsChange.updateEvent(target.id, {
-						title: previous.title,
-						description: previous.description,
-						dayIndex: previous.dayIndex,
-						start_time: previous.start_time,
-						end_time: previous.end_time,
-						start_date: previous.start_date,
-					});
+					onEventsChange.updateEvent(target.id, buildRollbackPatch(previous));
 				}
 			}
 		});
 	};
 
-	const updateGoalSeries = (
-		goalId: string,
-		data: Partial<Omit<DayEvent, "id" | "status">>,
-	) => {
+	const updateGoalSeries = (goalId: string, data: EventUpdateInput) => {
 		const targets = events.filter((e) => e.goal_id === goalId);
 		if (targets.length === 0) return;
 
@@ -233,57 +260,39 @@ export function useGoalActions(
 
 		startTransition(async () => {
 			try {
-				const dataForServer = { ...data };
-				delete dataForServer.dayIndex;
-				delete dataForServer.goal_id;
-				delete dataForServer.occurrence_date;
-				await updateGoalAction(goalId, dataForServer);
+				await updateGoalAction(goalId, toGoalUpdatePayload(data));
 			} catch {
 				previous.forEach((prev) => {
-					onEventsChange.updateEvent(prev.id, {
-						title: prev.title,
-						description: prev.description,
-						dayIndex: prev.dayIndex,
-						start_time: prev.start_time,
-						end_time: prev.end_time,
-						start_date: prev.start_date,
-					});
+					onEventsChange.updateEvent(prev.id, buildRollbackPatch(prev));
 				});
 			}
 		});
 	};
 
-	const detachGoalOccurrence = (
-		goalId: string,
-		newDate: string,
-		oldDate: string,
-		data: {
-			title: string;
-			description?: string;
-			start_time: string;
-			end_time: string;
-		},
-	) => {
-		const target = events.find(
-			(e) => e.goal_id === goalId && e.occurrence_date === oldDate,
-		);
-		if (!target) return;
-
-		onEventsChange.deleteEvent(target.id);
+	const detachOccurrence = ({
+		event,
+		newDate,
+		patch,
+		newDayIndex,
+	}: DetachOccurrenceParams) => {
+		const goalId = event.goal_id;
+		const oldDate = event.occurrence_date;
+		onEventsChange.deleteEvent(event.id);
 
 		const tempId = crypto.randomUUID();
 		const detached: DayEvent = {
-			...target,
+			...event,
 			id: tempId,
 			goal_id: tempId,
 			occurrence_date: newDate,
 			recurrence_type: "none",
 			recurrence_days: null,
 			start_date: newDate,
-			title: data.title,
-			description: data.description,
-			start_time: data.start_time,
-			end_time: data.end_time,
+			dayIndex: newDayIndex ?? event.dayIndex,
+			title: patch.title,
+			description: patch.description,
+			start_time: patch.start_time,
+			end_time: patch.end_time,
 		};
 
 		onEventsChange.addEvent(detached);
@@ -294,66 +303,11 @@ export function useGoalActions(
 					goalId,
 					newDate,
 					oldDate,
-					...data,
+					...patch,
 				});
-
 				onEventsChange.replaceEventAndGoalId(tempId, created.id);
 			} catch {
-				onEventsChange.restoreEvent(target);
-				onEventsChange.deleteEvent(tempId);
-			}
-		});
-	};
-
-	const detachGoalOccurrenceWithMove = (
-		goalId: string,
-		oldDate: string,
-		newDate: string,
-		newDayIndex: number,
-		data: {
-			title: string;
-			description?: string;
-			start_time: string;
-			end_time: string;
-		},
-	) => {
-		const target = events.find(
-			(e) => e.goal_id === goalId && e.occurrence_date === oldDate,
-		);
-		if (!target) return;
-
-		onEventsChange.deleteEvent(target.id);
-
-		const tempId = crypto.randomUUID();
-		const detached: DayEvent = {
-			...target,
-			id: tempId,
-			goal_id: tempId,
-			occurrence_date: newDate,
-			recurrence_type: "none",
-			recurrence_days: null,
-			start_date: newDate,
-			dayIndex: newDayIndex,
-			title: data.title,
-			description: data.description,
-			start_time: data.start_time,
-			end_time: data.end_time,
-		};
-
-		onEventsChange.addEvent(detached);
-
-		startTransition(async () => {
-			try {
-				const created = await detachGoalOccurrenceAction({
-					goalId,
-					newDate,
-					oldDate,
-					...data,
-				});
-
-				onEventsChange.replaceEventAndGoalId(tempId, created.id);
-			} catch {
-				onEventsChange.restoreEvent(target);
+				onEventsChange.restoreEvent(event);
 				onEventsChange.deleteEvent(tempId);
 			}
 		});
@@ -399,6 +353,34 @@ export function useGoalActions(
 		});
 	};
 
+	const updateGoalFromDate = (
+		event: DayEvent,
+		data: EventUpdateInput & {
+			recurrence_type: RecurrenceType;
+			recurrence_days?: number[] | null;
+		},
+	) => {
+		startTransition(async () => {
+			try {
+				await splitGoalSeriesFromDateAction({
+					goalId: event.goal_id,
+					fromDate: event.occurrence_date,
+					updates: {
+						title: data.title,
+						description: data.description,
+						start_time: data.start_time,
+						end_time: data.end_time,
+						recurrence_type: data.recurrence_type,
+						recurrence_days: data.recurrence_days ?? null,
+					},
+				});
+				router.refresh();
+			} catch {
+				// no-op: keep current local state until next successful refresh
+			}
+		});
+	};
+
 	return {
 		isPending,
 		createGoal,
@@ -407,8 +389,8 @@ export function useGoalActions(
 		updateGoal,
 		updateGoalOccurrence,
 		updateGoalSeries,
-		detachGoalOccurrence,
-		detachGoalOccurrenceWithMove,
+		detachOccurrence,
+		updateGoalFromDate,
 		deleteGoalOccurrence,
 		deleteGoal,
 	};

@@ -1,6 +1,7 @@
 import { endOfWeek, startOfWeek } from "date-fns";
 import { getCurrentUser } from "../goals/queries";
 import { createSupabaseServerClient } from "../supabase/server-client";
+import { formatISODate } from "@/shared/lib/date";
 
 export async function getWeekGoals(currentDate: Date) {
 	const supabase = await createSupabaseServerClient();
@@ -8,8 +9,8 @@ export async function getWeekGoals(currentDate: Date) {
 
 	const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
 	const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
-	const weekStartStr = weekStart.toISOString().slice(0, 10);
-	const weekEndStr = weekEnd.toISOString().slice(0, 10);
+	const weekStartStr = formatISODate(weekStart);
+	const weekEndStr = formatISODate(weekEnd);
 
 	const { data, error } = await supabase
 		.from("goals")

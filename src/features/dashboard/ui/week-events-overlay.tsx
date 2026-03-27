@@ -1,14 +1,13 @@
 "use client";
 
 import { cn } from "@/shared/lib/cn";
-import { useDashboard } from "../context/DashboardContext";
+import { useDashboard } from "../model";
 import { useState } from "react";
 import { toHHMM } from "@/lib/utils";
+import { getEventLayout } from "@/shared/lib/layout";
+import { RepeatIcon } from "lucide-react";
 
-const HOUR_HEIGHT = 60;
-const MINUTE_HEIGHT = HOUR_HEIGHT / 60;
-
-export default function WeekEventsLayer() {
+export default function WeekEventsOverlay() {
 	const {
 		events,
 		onToggle,
@@ -37,21 +36,18 @@ export default function WeekEventsLayer() {
 	return (
 		<div className="absolute inset-0 pointer-events-none">
 			{events.map((event) => {
-				const [startHour, startMinute] = event.start_time
-					.split(":")
-					.map(Number);
-				const [endHour, endMinute] = event.end_time.split(":").map(Number);
-
-				const top = startHour * HOUR_HEIGHT + startMinute * MINUTE_HEIGHT;
-
-				const durationMinutes =
-					endHour * 60 + endMinute - (startHour * 60 + startMinute);
-
-				const snappedDurationMinutes = Math.max(
-					15,
-					Math.round(durationMinutes / 15) * 15,
+				const { top, height } = getEventLayout(
+					event.start_time,
+					event.end_time,
 				);
-				const height = snappedDurationMinutes * MINUTE_HEIGHT;
+
+				const isRecurring =
+					event.recurrence_type && event.recurrence_type !== "none";
+				const recurrenceShort = event.recurrence_type === "weekly" ? "W" : "D";
+				const recurrenceTitle =
+					event.recurrence_type === "weekly"
+						? "Repeats weekly"
+						: "Repeats daily";
 				const showMeta = height >= 44;
 				const showStatus = height >= 64;
 				const isCompact = height < 28;
@@ -107,6 +103,20 @@ export default function WeekEventsLayer() {
 										onClick={(e) => e.stopPropagation()}
 									/>
 									<div className="event-title">{event.title}</div>
+									{isRecurring && (
+										<span
+											className="event-repeat-mark"
+											title={recurrenceTitle}
+											aria-label={recurrenceTitle}
+										>
+											<RepeatIcon
+												className="event-repeat-icon"
+												size={12}
+												strokeWidth={2.2}
+											/>
+											{recurrenceShort}
+										</span>
+									)}
 								</div>
 								{showMeta && (
 									<div className="event-meta">

@@ -1,8 +1,7 @@
-export default function TimeColumn() {
-	const hours = Array.from(
-		{ length: 24 },
-		(_, i) => i.toString().padStart(2, "0") + ":00",
-	);
+import { getHourLabel } from "@/shared/lib/layout";
+
+export default function TimeGutter() {
+	const hours = Array.from({ length: 24 }, (_, i) => getHourLabel(i));
 
 	return (
 		<div className="w-12 border-r border-border bg-background/70">

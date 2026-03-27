@@ -1,17 +1,20 @@
-import { getWeekDates } from "@/shared/lib/date";
-import { format } from "date-fns";
+"use client";
 
-export default function WeekHeader() {
+import { getWeekDates, isSameISODate } from "@/shared/lib/date";
+import { format } from "date-fns";
+import { useDashboard } from "../model";
+
+export default function WeekDaysHeader() {
+	const { weekStart } = useDashboard();
 	const today = new Date();
-	const weekDates = getWeekDates(today);
+	const weekDates = getWeekDates(new Date(weekStart));
 
 	return (
-		<div className="flex sticky top-0 z-20 backdrop-blur border border-border overflow-hidden text-foreground">
+		<div className="flex sticky top-0 z-100 backdrop-blur border border-border overflow-hidden text-foreground">
 			<div className="w-12 p-4 font-medium border-r border-b border-border"></div>
 			<div className="flex-1 grid grid-cols-7 border-b border-border">
 				{weekDates.map((date) => {
-					const isToday =
-						format(date, "yyyy-MM-dd") === format(today, "yyyy-MM-dd");
+					const isToday = isSameISODate(date, today);
 
 					return (
 						<div
@@ -22,16 +25,16 @@ export default function WeekHeader() {
 						>
 							<div
 								className={`text-sm ${
-									isToday ? "text-primary font-semibold" : "text-muted-foreground"
+									isToday
+										? "text-primary font-semibold"
+										: "text-muted-foreground"
 								}`}
 							>
 								{format(date, "EEE")}
 							</div>
 
 							<div
-								className={`text-lg ${
-									isToday ? "text-primary font-bold" : ""
-								}`}
+								className={`text-lg ${isToday ? "text-primary font-bold" : ""}`}
 							>
 								{format(date, "d")}
 							</div>

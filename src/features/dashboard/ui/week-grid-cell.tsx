@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useDashboard } from "../context/DashboardContext";
+import { useDashboard } from "../model";
 
 type Props = {
 	onClick: () => void;
@@ -7,7 +7,7 @@ type Props = {
 	hourIndex: number;
 };
 
-export default function WeekCell({ onClick, dayIndex, hourIndex }: Props) {
+export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 	const [isDragOver, setIsDragOver] = useState(false);
 	const {
 		onEventDrop,

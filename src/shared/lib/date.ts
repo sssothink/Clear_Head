@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+
 export function getStartOfWeek(date: Date) {
 	const day = date.getDay();
 	const diff = day === 0 ? -6 : 1 - day;
@@ -15,4 +17,12 @@ export function getWeekDates(baseDate: Date) {
 		d.setDate(start.getDate() + i);
 		return d;
 	});
+}
+
+export function formatISODate(date: Date) {
+	return format(date, "yyyy-MM-dd");
+}
+
+export function isSameISODate(a: Date, b: Date) {
+	return formatISODate(a) === formatISODate(b);
 }

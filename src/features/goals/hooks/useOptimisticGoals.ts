@@ -21,7 +21,6 @@ export function useOptimisticGoals(
 		deleteEvent,
 		deleteEventsByGoalId,
 		replaceEventAndGoalId,
-		replaceEvent,
 		replaceGoalId,
 		restoreEvent,
 	} = useGoalEvents(initialEvents);
@@ -33,9 +32,9 @@ export function useOptimisticGoals(
 		updateGoal,
 		updateGoalOccurrence,
 		updateGoalSeries,
-		detachGoalOccurrence,
+		detachOccurrence,
+		updateGoalFromDate,
 		deleteGoalOccurrence,
-		detachGoalOccurrenceWithMove,
 		deleteGoal,
 	} = useGoalActions(
 		events,
@@ -44,7 +43,6 @@ export function useOptimisticGoals(
 			updateEvent,
 			deleteEvent,
 			deleteEventsByGoalId,
-			replaceEvent,
 			replaceGoalId,
 			replaceEventAndGoalId,
 			restoreEvent,
@@ -61,8 +59,8 @@ export function useOptimisticGoals(
 		updateGoalOccurrence,
 		updateGoalSeries,
 		deleteGoalOccurrence,
-		detachGoalOccurrence,
-		detachGoalOccurrenceWithMove,
+		detachOccurrence,
+		updateGoalFromDate,
 		replaceGoalId,
 		deleteGoal,
 	};

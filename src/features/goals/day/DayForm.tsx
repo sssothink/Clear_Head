@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import {
@@ -11,7 +11,18 @@ import {
 	SelectItem,
 } from "@/shared/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
-import { format } from "date-fns";
+import {
+	isRecurrenceType,
+	RECURRENCE_TYPES,
+	RecurrenceType,
+} from "../model/types";
+import { formatISODate } from "@/shared/lib/date";
+import { addMinutesToTime, isQuarterHour } from "@/shared/lib/time";
+const recurrenceLabels: Record<RecurrenceType, string> = {
+	none: "Do not repeat",
+	daily: "Daily",
+	weekly: "Weekly",
+};
 
 type DayFormProps = {
 	defaultTitle?: string;
@@ -23,7 +34,7 @@ type DayFormProps = {
 		start_time: string;
 		end_time: string;
 		date: string;
-		recurrence_type: "none" | "daily" | "weekly";
+		recurrence_type: RecurrenceType;
 		recurrence_days?: number[];
 	}) => void;
 };
@@ -36,13 +47,13 @@ export default function DayForm({
 	onSubmit,
 }: DayFormProps) {
 	const [title, setTitle] = useState(defaultTitle ?? "");
-	const date = defaultDate ?? format(new Date(), "yyyy-MM-dd");
+	const date = defaultDate ?? formatISODate(new Date());
 	const [startTime, setStartTime] = useState(defaultStartTime ?? "09:00");
 	const [endTime, setEndTime] = useState(defaultEndTime ?? "10:00");
-	const [recurrence, setRecurrence] = useState<"none" | "daily" | "weekly">(
-		"none",
-	);
+	const [recurrence, setRecurrence] = useState<RecurrenceType>("none");
 	const [days, setDays] = useState<number[]>([]);
+	const [error, setError] = useState<string | null>(null);
+	const minEndTime = useMemo(() => addMinutesToTime(startTime, 15), [startTime]);
 
 	const toggleDay = (day: number) => {
 		setDays((prev) =>
@@ -52,6 +63,27 @@ export default function DayForm({
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
+		setError(null);
+
+		if (endTime <= startTime) {
+			setError("End time must be later than start time.");
+			return;
+		}
+
+		if (!isQuarterHour(startTime) || !isQuarterHour(endTime)) {
+			setError("Time must be in 15-minute increments.");
+			return;
+		}
+
+		if (!minEndTime || endTime < minEndTime) {
+			setError("End time must be at least 15 minutes after start time.");
+			return;
+		}
+
+		if (recurrence === "weekly" && days.length === 0) {
+			setError("Choose at least one weekday for weekly recurrence.");
+			return;
+		}
 
 		onSubmit({
 			title,
@@ -63,6 +95,7 @@ export default function DayForm({
 		});
 
 		setTitle("");
+		setError(null);
 	};
 
 	return (
@@ -78,26 +111,42 @@ export default function DayForm({
 				<Input
 					type="time"
 					value={startTime}
-					onChange={(e) => setStartTime(e.target.value)}
+					step={900}
+					onChange={(e) => {
+						const nextStart = e.target.value;
+						setStartTime(nextStart);
+
+						const nextMinEnd = addMinutesToTime(nextStart, 15);
+						if (nextMinEnd && endTime < nextMinEnd) {
+							setEndTime(nextMinEnd);
+						}
+					}}
 				/>
 				<Input
 					type="time"
 					value={endTime}
+					step={900}
+					min={minEndTime ?? undefined}
+					disabled={!minEndTime}
 					onChange={(e) => setEndTime(e.target.value)}
 				/>
 			</div>
 
 			<Select
 				value={recurrence}
-				onValueChange={(v) => setRecurrence(v as "none" | "daily" | "weekly")}
+				onValueChange={(v) => {
+					if (isRecurrenceType(v)) setRecurrence(v);
+				}}
 			>
 				<SelectTrigger>
 					<SelectValue />
 				</SelectTrigger>
 				<SelectContent>
-					<SelectItem value="none">Do not repeat</SelectItem>
-					<SelectItem value="daily">Daily</SelectItem>
-					<SelectItem value="weekly">Weekly</SelectItem>
+					{RECURRENCE_TYPES.map((type) => (
+						<SelectItem key={type} value={type}>
+							{recurrenceLabels[type]}
+						</SelectItem>
+					))}
 				</SelectContent>
 			</Select>
 
@@ -125,6 +174,7 @@ export default function DayForm({
 			</AnimatePresence>
 
 			<Button type="submit">Add task</Button>
+			{error && <p className="text-sm text-destructive">{error}</p>}
 		</form>
 	);
 }

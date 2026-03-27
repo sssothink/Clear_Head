@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DayEvent } from "../model/types";
 
 export function useGoalEvents(initialEvents: DayEvent[]) {
 	const [events, setEvents] = useState<DayEvent[]>(initialEvents);
+
+	useEffect(() => {
+		setEvents(initialEvents);
+	}, [initialEvents]);
 
 	const addEvent = (event: DayEvent) => {
 		setEvents((prev) =>
@@ -24,12 +28,6 @@ export function useGoalEvents(initialEvents: DayEvent[]) {
 
 	const deleteEventsByGoalId = (goalId: string) => {
 		setEvents((prev) => prev.filter((e) => e.goal_id !== goalId));
-	};
-
-	const replaceEvent = (oldId: string, newId: string) => {
-		setEvents((prev) =>
-			prev.map((e) => (e.id === oldId ? { ...e, id: newId } : e)),
-		);
 	};
 
 	const replaceGoalId = (oldGoalId: string, newGoalId: string) => {
@@ -68,13 +66,11 @@ export function useGoalEvents(initialEvents: DayEvent[]) {
 
 	return {
 		events,
-		setEvents,
 		addEvent,
 		updateEvent,
 		deleteEvent,
 		deleteEventsByGoalId,
 		replaceEventAndGoalId,
-		replaceEvent,
 		replaceGoalId,
 		restoreEvent,
 	};

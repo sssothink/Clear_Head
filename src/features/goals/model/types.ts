@@ -1,6 +1,12 @@
-export type RecurrenceType = "none" | "daily" | "weekly";
-export type GoalStatus = "planned" | "completed";
-export type ISODate = string;
+export const RECURRENCE_TYPES = ["none", "daily", "weekly"] as const;
+export type RecurrenceType = (typeof RECURRENCE_TYPES)[number];
+
+export const GOAL_STATUSES = ["planned", "completed"] as const;
+export type GoalStatus = (typeof GOAL_STATUSES)[number];
+
+export function isRecurrenceType(value: string): value is RecurrenceType {
+	return RECURRENCE_TYPES.includes(value as RecurrenceType);
+}
 
 export type GoalOccurrence = {
 	goal_id: string;
@@ -30,7 +36,7 @@ export type DayEvent = {
 	end_time: string;
 	start_date?: string | null;
 	status: GoalStatus;
-	recurrence_type?: "none" | "daily" | "weekly";
+	recurrence_type?: RecurrenceType;
 	recurrence_days?: number[] | null;
 };
 

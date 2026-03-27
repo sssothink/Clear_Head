@@ -14,7 +14,7 @@ export default function HomePage() {
 						</p>
 
 						<div className="mt-6 flex gap-3">
-							<button className="rounded-lg bg-[var(--primary)] px-4 py-2 text-white text-sm">
+							<button className="rounded-lg bg-primary px-4 py-2 text-white text-sm">
 								Начать
 							</button>
 							<button className="rounded-lg border px-4 py-2 text-sm">

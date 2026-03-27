@@ -1,13 +1,12 @@
 "use client";
 
-import WeekCell from "./WeekCell";
-import WeekEventsLayer from "./WeekEventsLayer";
-import { addDays, format } from "date-fns";
-import { useDashboard } from "../context/DashboardContext";
+import WeekGridCell from "./week-grid-cell";
+import WeekEventsOverlay from "./week-events-overlay";
+import { addDays } from "date-fns";
+import { useDashboard } from "../model";
 import { useEffect, useState } from "react";
-
-const HOUR_HEIGHT = 60;
-const MINUTE_HEIGHT = HOUR_HEIGHT / 60;
+import { formatISODate } from "@/shared/lib/date";
+import { getCurrentTimeTop } from "@/shared/lib/layout";
 
 export default function WeekGrid() {
 	const { weekStart, onCellClick } = useDashboard();
@@ -16,8 +15,7 @@ export default function WeekGrid() {
 	const days = Array.from({ length: 7 });
 	const currentHour = now.getHours();
 	const currentMinute = now.getMinutes();
-	const currentTimeTop =
-		currentHour * HOUR_HEIGHT + currentMinute + MINUTE_HEIGHT;
+	const currentTimeTop = getCurrentTimeTop(now);
 
 	useEffect(() => {
 		const tick = () => setNow(new Date());
@@ -31,7 +29,7 @@ export default function WeekGrid() {
 				<div className="grid grid-cols-7 grid-rows-24">
 					{hours.map((_, hourIndex) =>
 						days.map((_, dayIndex) => (
-							<WeekCell
+							<WeekGridCell
 								key={`${dayIndex}-${hourIndex}`}
 								dayIndex={dayIndex}
 								hourIndex={hourIndex}
@@ -39,10 +37,7 @@ export default function WeekGrid() {
 									onCellClick({
 										dayIndex,
 										hourIndex,
-										date: format(
-											addDays(new Date(weekStart), dayIndex),
-											"yyyy-MM-dd",
-										),
+										date: formatISODate(addDays(new Date(weekStart), dayIndex)),
 									})
 								}
 							/>
@@ -52,7 +47,7 @@ export default function WeekGrid() {
 
 				<div
 					style={{ top: `${currentTimeTop}px` }}
-					className="absolute -left-10 transform -translate-y-1/2 bg-primary text-white text-[11px] px-2 py-0.5 rounded-full z-10 pointer-events-none shadow"
+					className="absolute -left-10 transform -translate-y-1/2 bg-primary text-black text-[11px] px-2 py-0.5 rounded-full z-10 pointer-events-none shadow"
 				>
 					{`${String(currentHour).padStart(2, "0")}:${String(currentMinute).padStart(2, "0")}`}
 				</div>
@@ -62,7 +57,7 @@ export default function WeekGrid() {
 					className="absolute left-0 right-0 h-0.5 bg-primary/70 z-10 pointer-events-none"
 				></div>
 
-				<WeekEventsLayer />
+				<WeekEventsOverlay />
 			</div>
 		</div>
 	);

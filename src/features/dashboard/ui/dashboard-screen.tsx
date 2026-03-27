@@ -1,12 +1,13 @@
 "use client";
 
-import TimeColumn from "./components/TimeColumn";
-import WeekGrid from "./components/WeekGrid";
-import WeekHeader from "./components/WeekHeader";
-import CreateGoal from "./components/CreateGoal";
-import { Goal, GoalOccurrence } from "../goals/model/types";
-import { DashboardProvider, useDashboard } from "./context/DashboardContext";
-import { addDays, format } from "date-fns";
+import TimeGutter from "./time-gutter";
+import WeekGrid from "./week-grid";
+import WeekDaysHeader from "./week-days-header";
+import GoalEditorPopover from "./goal-editor-popover";
+import { Goal, GoalOccurrence } from "@/features/goals/model/types";
+import { DashboardProvider, useDashboard } from "../model";
+import { addDays } from "date-fns";
+import { formatISODate } from "@/shared/lib/date";
 
 function DashboardContent() {
 	const {
@@ -20,23 +21,30 @@ function DashboardContent() {
 		panelAnchor,
 	} = useDashboard();
 
+	const isRecurring = editingEvent?.recurrence_type !== "none";
+
 	return (
 		<div className="min-h-screen bg-background text-foreground">
-			<WeekHeader />
+			<WeekDaysHeader />
 			<div className="flex border border-border bg-card shadow-sm overflow-hidden">
-				<TimeColumn />
+				<TimeGutter />
 				<WeekGrid />
 			</div>
 
 			{(selectedSlot || editingEvent) && (
-				<CreateGoal
+				<GoalEditorPopover
+					key={
+						editingEvent
+							? `edit-${editingEvent.id}`
+							: `slot-${selectedSlot?.dayIndex}-${selectedSlot?.hourIndex}-${selectedSlot?.date}`
+					}
 					slot={selectedSlot ?? undefined}
 					onClose={onClose}
 					onSubmit={onSubmit}
 					panelAnchor={panelAnchor}
 					onDelete={
 						editingEvent
-							? editingEvent.recurrence_type !== "none"
+							? isRecurring
 								? undefined
 								: () => {
 										onDelete(editingEvent.goal_id);
@@ -45,7 +53,7 @@ function DashboardContent() {
 							: undefined
 					}
 					onDeleteOnly={
-						editingEvent && editingEvent.recurrence_type !== "none"
+						editingEvent && isRecurring
 							? () => {
 									onDeleteOccurrence(
 										editingEvent.goal_id,
@@ -56,7 +64,7 @@ function DashboardContent() {
 							: undefined
 					}
 					onDeleteAll={
-						editingEvent && editingEvent.recurrence_type !== "none"
+						editingEvent && isRecurring
 							? () => {
 									onDelete(editingEvent.goal_id);
 									onClose();
@@ -72,9 +80,8 @@ function DashboardContent() {
 									end_time: editingEvent.end_time,
 									recurrence_type: editingEvent.recurrence_type,
 									recurrence_days: editingEvent.recurrence_days,
-									date: format(
+									date: formatISODate(
 										addDays(new Date(weekStart), editingEvent.dayIndex),
-										"yyyy-MM-dd",
 									),
 								}
 							: undefined
@@ -85,7 +92,7 @@ function DashboardContent() {
 	);
 }
 
-export default function DashboardClient({
+export default function DashboardScreen({
 	initialGoals,
 	initialOccurrences,
 	weekStart,

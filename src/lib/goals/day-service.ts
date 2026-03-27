@@ -1,3 +1,4 @@
+import { matchesRecurrenceOnDate } from "@/shared/lib/recurrence";
 import { getCurrentUser, getUserDayGoals, getGoalOverrides } from "./queries";
 
 export async function getDayEvents(date: string) {
@@ -13,13 +14,14 @@ export async function getDayEvents(date: string) {
 
 	const overrideMap = new Map(overrides?.map((o) => [o.goal_id, o]) ?? []);
 
-	const jsDay = new Date(date).getDay();
-	const normalizedDay = jsDay === 0 ? 7 : jsDay;
-
 	const events =
 		goals
 			?.filter((goal) => {
-			if (goal.is_deleted) return false;
+				const targetDate = new Date(date);
+
+				if (!matchesRecurrenceOnDate(goal, targetDate) || goal.is_deleted)
+					return false;
+
 				if (goal.recurrence_type === "none") {
 					return goal.start_date === date;
 				}
@@ -28,21 +30,13 @@ export async function getDayEvents(date: string) {
 					if (goal.start_date && date < goal.start_date) return false;
 
 					if (goal.recurrence_end && date > goal.recurrence_end) return false;
-
-					return true;
 				}
 
 				if (goal.recurrence_type === "weekly") {
-					if (!goal.recurrence_days) return false;
-
-					if (!goal.recurrence_days.includes(normalizedDay)) return false;
-
 					if (goal.recurrence_end && date > goal.recurrence_end) return false;
-
-					return true;
 				}
 
-				return false;
+				return true;
 			})
 			.map((goal) => {
 				const override = overrideMap.get(goal.id);

@@ -1,5 +1,7 @@
 import { Goal, DayEvent, GoalOccurrence } from "@/features/goals/model/types";
-import { addDays, format } from "date-fns";
+import { formatISODate } from "@/shared/lib/date";
+import { addDays } from "date-fns";
+import { matchesRecurrenceOnDate } from "@/shared/lib/recurrence";
 
 export function buildWeekEvents(
 	goals: Goal[],
@@ -14,83 +16,30 @@ export function buildWeekEvents(
 
 	for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
 		const currentDate = addDays(weekStartDate, dayIndex);
-		const formatted = format(currentDate, "yyyy-MM-dd");
+		const formatted = formatISODate(currentDate);
 
 		goals.forEach((goal) => {
-			if (goal.recurrence_type === "none") {
-				if (goal.start_date === formatted) {
-					const key = `${goal.id}_${formatted}`;
-					const occurrence = occurrenceMap.get(key);
+			if (!matchesRecurrenceOnDate(goal, currentDate)) return;
 
-					if (occurrence?.is_deleted) return; // пропустить
+			const key = `${goal.id}_${formatted}`;
+			const occurrence = occurrenceMap.get(key);
 
-					const status = occurrence?.status ?? "planned";
+			if (occurrence?.is_deleted) return;
 
-					events.push({
-						...goal,
-						id: key,
-						goal_id: goal.id,
-						occurrence_date: formatted,
-						dayIndex,
-						status,
-						title: occurrence?.title ?? goal.title,
-						description: occurrence?.description ?? goal.description,
-						start_time: occurrence?.start_time ?? goal.start_time,
-						end_time: occurrence?.end_time ?? goal.end_time,
-					});
-				}
-			}
+			const status = occurrence?.status ?? "planned";
 
-			if (goal.recurrence_type === "daily") {
-				const key = `${goal.id}_${formatted}`;
-				const occurrence = occurrenceMap.get(key);
-
-				if (occurrence?.is_deleted) return; // пропустить
-
-				const status = occurrence?.status ?? "planned";
-
-				events.push({
-					...goal,
-					id: key,
-					goal_id: goal.id,
-					occurrence_date: formatted,
-					dayIndex,
-					status,
-					title: occurrence?.title ?? goal.title,
-					description: occurrence?.description ?? goal.description,
-					start_time: occurrence?.start_time ?? goal.start_time,
-					end_time: occurrence?.end_time ?? goal.end_time,
-				});
-			}
-
-			if (goal.recurrence_type === "weekly") {
-				const weekDay = currentDate.getDay();
-				const normalizedWeekDay = weekDay === 0 ? 7 : weekDay;
-
-				if (!goal.recurrence_days?.includes(normalizedWeekDay)) {
-					return;
-				}
-
-				const key = `${goal.id}_${formatted}`;
-				const occurrence = occurrenceMap.get(key);
-
-				if (occurrence?.is_deleted) return; // пропустить
-
-				const status = occurrence?.status ?? "planned";
-
-				events.push({
-					...goal,
-					id: key,
-					goal_id: goal.id,
-					occurrence_date: formatted,
-					dayIndex,
-					status,
-					title: occurrence?.title ?? goal.title,
-					description: occurrence?.description ?? goal.description,
-					start_time: occurrence?.start_time ?? goal.start_time,
-					end_time: occurrence?.end_time ?? goal.end_time,
-				});
-			}
+			events.push({
+				...goal,
+				id: key,
+				goal_id: goal.id,
+				occurrence_date: formatted,
+				dayIndex,
+				status,
+				title: occurrence?.title ?? goal.title,
+				description: occurrence?.description ?? goal.description,
+				start_time: occurrence?.start_time ?? goal.start_time,
+				end_time: occurrence?.end_time ?? goal.end_time,
+			});
 		});
 	}
 
