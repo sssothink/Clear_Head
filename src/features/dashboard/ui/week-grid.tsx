@@ -6,11 +6,23 @@ import { addDays } from "date-fns";
 import { useDashboard } from "../model";
 import { useEffect, useRef, useState } from "react";
 import { formatISODate } from "@/shared/lib/date";
-import { getCurrentTimeTop } from "@/shared/lib/layout";
+import {
+	getCurrentTimeTop,
+	hourToVisualHeight,
+	minuteToY,
+} from "@/shared/lib/layout";
 
 export default function WeekGrid() {
-	const { weekStart, onCellClick, hourHeight, setHourHeight } = useDashboard();
-	const MIN_HOUR_HEIGHT = 32;
+	const {
+		weekStart,
+		onCellClick,
+		hourHeight,
+		setHourHeight,
+		isCollapsed,
+		setIsCollapsedManual,
+		hasEarlyTasks,
+	} = useDashboard();
+	const MIN_HOUR_HEIGHT = 40;
 	const MAX_HOUR_HEIGHT = 120;
 	const ZOOM_STEP = 4;
 	const [now, setNow] = useState(new Date());
@@ -18,7 +30,7 @@ export default function WeekGrid() {
 	const days = Array.from({ length: 7 });
 	const currentHour = now.getHours();
 	const currentMinute = now.getMinutes();
-	const currentTimeTop = getCurrentTimeTop(now, hourHeight);
+	const currentTimeTop = getCurrentTimeTop(now, hourHeight, isCollapsed);
 	const gridRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
@@ -48,13 +60,18 @@ export default function WeekGrid() {
 		return () => clearInterval(id);
 	}, []);
 
+	const hourHeights = Array.from({ length: 24 }, (_, h) =>
+		hourToVisualHeight(h, hourHeight, isCollapsed),
+	);
+
+	const gridTemplateRows = hourHeights.map((h) => `${h}px`).join(" ");
+
+	const collapseBoundaryTop = minuteToY(8 * 60, hourHeight, isCollapsed);
+
 	return (
 		<div ref={gridRef} className="flex-1">
 			<div className="relative bg-background">
-				<div
-					className="grid grid-cols-7"
-					style={{ gridTemplateRows: `repeat(24, ${hourHeight}px)` }}
-				>
+				<div className="grid grid-cols-7" style={{ gridTemplateRows }}>
 					{hours.map((_, hourIndex) =>
 						days.map((_, dayIndex) => (
 							<WeekGridCell
@@ -79,6 +96,18 @@ export default function WeekGrid() {
 				>
 					{`${String(currentHour).padStart(2, "0")}:${String(currentMinute).padStart(2, "0")}`}
 				</div>
+
+				<button
+					type="button"
+					className="collapse-toggle"
+					style={{ top: collapseBoundaryTop - 12 }}
+					onClick={() => {
+						if (!isCollapsed && hasEarlyTasks) return;
+						setIsCollapsedManual((v) => !v);
+					}}
+				>
+					{isCollapsed ? "Expand 00-08" : "Collapse 00-08"}
+				</button>
 
 				<div
 					style={{ top: `${currentTimeTop}px` }}

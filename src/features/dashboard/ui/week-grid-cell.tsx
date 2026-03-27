@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useDashboard } from "../model";
 
 type Props = {
@@ -16,7 +16,9 @@ export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 		editingEvent,
 		onClose,
 		suppressNextOpenRef,
-		hourHeight,
+		isCollapsed,
+		setIsCollapsedManual,
+		hasEarlyTasks,
 	} = useDashboard();
 
 	const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -37,10 +39,45 @@ export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 			onEventDrop(eventId, dayIndex, hourIndex);
 		}
 	};
+	const cellRef = useRef<HTMLDivElement | null>(null);
+
+	const toggleCollapseKeepingCellPosition = (
+		applyToggle: () => void,
+		onAfterLayout?: () => void,
+	) => {
+		const el = cellRef.current;
+		if (!el) {
+			applyToggle();
+			onAfterLayout?.();
+			return;
+		}
+
+		const beforeTop = el.getBoundingClientRect().top;
+		applyToggle();
+
+		requestAnimationFrame(() => {
+			const afterEl = cellRef.current;
+			if (!afterEl) {
+				onAfterLayout?.();
+				return;
+			}
+
+			const afterTop = afterEl.getBoundingClientRect().top;
+			const delta = afterTop - beforeTop;
+
+			if (Math.abs(delta) > 0.5) {
+				window.scrollBy({ top: delta, left: 0, behavior: "auto" });
+			}
+
+			requestAnimationFrame(() => {
+				onAfterLayout?.();
+			});
+		});
+	};
 
 	return (
 		<div
-			style={{ height: hourHeight }}
+			ref={cellRef}
 			className={`border-r border-b border-border bg-background hover:bg-muted/60 transition-colors
 				${isDragOver ? "bg-primary/15" : ""}
 			`}
@@ -49,14 +86,45 @@ export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 					suppressNextOpenRef.current = false;
 					return;
 				}
+
+				const shouldExpand = isCollapsed && hourIndex < 8;
+				const shouldCollapse = !isCollapsed && !hasEarlyTasks && hourIndex >= 8;
+
 				if (selectedSlot || editingEvent) {
+					if (shouldExpand) {
+						toggleCollapseKeepingCellPosition(() => setIsCollapsedManual(false));
+					} else if (shouldCollapse) {
+						toggleCollapseKeepingCellPosition(() => setIsCollapsedManual(true));
+					}
 					onClose();
 					setPanelAnchor(null);
 					return;
 				}
-				const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-				setPanelAnchor(rect);
-				onClick();
+
+				const clickedCell = e.currentTarget as HTMLElement;
+
+				const openFromCurrentCell = () => {
+					setPanelAnchor(clickedCell.getBoundingClientRect());
+					onClick();
+				};
+
+				if (shouldExpand) {
+					toggleCollapseKeepingCellPosition(
+						() => setIsCollapsedManual(false),
+						openFromCurrentCell,
+					);
+					return;
+				}
+
+				if (shouldCollapse) {
+					toggleCollapseKeepingCellPosition(
+						() => setIsCollapsedManual(true),
+						openFromCurrentCell,
+					);
+					return;
+				}
+
+				openFromCurrentCell();
 			}}
 			onDragOver={handleDragOver}
 			onDragLeave={handleDragLeave}

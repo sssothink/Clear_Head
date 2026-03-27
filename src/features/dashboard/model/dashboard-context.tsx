@@ -52,6 +52,9 @@ export type DashboardContextType = {
 	onDelete: (id: string) => void;
 	onDeleteOccurrence: (goalId: string, date: string) => void;
 
+	isCollapsed: boolean;
+	setIsCollapsedManual: React.Dispatch<React.SetStateAction<boolean>>;
+	hasEarlyTasks: boolean;
 	hourHeight: number;
 	setHourHeight: React.Dispatch<React.SetStateAction<number>>;
 	panelAnchor: DOMRect | null;
@@ -80,14 +83,13 @@ export function DashboardProvider({
 	weekStart: string;
 	children: React.ReactNode;
 }) {
-	const [hourHeight, setHourHeight] = useState(60);
-
-	useEffect(() => {
+	const [hourHeight, setHourHeight] = useState(() => {
+		if (typeof window === "undefined") return 60;
 		const raw = window.localStorage.getItem("calendar-hour-height");
-		if (!raw) return;
+		if (!raw) return 60;
 		const n = Number(raw);
-		if (Number.isFinite(n)) setHourHeight(n);
-	}, []);
+		return Number.isFinite(n) ? n : 60;
+	});
 
 	useEffect(() => {
 		window.localStorage.setItem("calendar-hour-height", String(hourHeight));
@@ -121,6 +123,15 @@ export function DashboardProvider({
 		updateGoal,
 		updateGoalFromDate,
 	} = useOptimisticGoals(baseEvents, weekStart);
+
+	const [isCollapsedManual, setIsCollapsedManual] = useState(true);
+
+	const hasEarlyTasks = events.some((event) => {
+		const [h, m] = event.start_time.split(":").map(Number);
+		return h * 60 + m < 8 * 60;
+	});
+
+	const isCollapsed = isCollapsedManual && !hasEarlyTasks;
 
 	const { onEdit, onSubmit, onEventDrop } = useDashboardInteractions({
 		events,
@@ -156,6 +167,9 @@ export function DashboardProvider({
 			onDelete: deleteGoal,
 			onDeleteOccurrence: deleteGoalOccurrence,
 
+			isCollapsed,
+			setIsCollapsedManual,
+			hasEarlyTasks,
 			hourHeight,
 			setHourHeight,
 			panelAnchor,
@@ -179,6 +193,10 @@ export function DashboardProvider({
 			panelAnchor,
 			setPanelAnchor,
 			suppressNextOpenRef,
+			isCollapsed,
+			setIsCollapsedManual,
+			hasEarlyTasks,
+			hourHeight,
 		],
 	);
 
