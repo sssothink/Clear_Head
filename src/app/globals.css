@@ -592,6 +592,176 @@ select:autofill {
 	font-size: 12px;
 }
 
+.goal-date-wrap {
+	position: relative;
+}
+
+.goal-date-trigger {
+	position: relative;
+	width: 100%;
+	height: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 34px 0 10px;
+	border-radius: 10px;
+	border: 1px solid
+		color-mix(in srgb, var(--muted-foreground) 35%, var(--border));
+	background: linear-gradient(
+		180deg,
+		color-mix(in srgb, var(--surface) 94%, var(--muted) 6%),
+		color-mix(in srgb, var(--surface) 88%, var(--muted) 12%)
+	);
+	box-shadow:
+		inset 0 1px 0 color-mix(in srgb, var(--text) 8%, transparent),
+		0 2px 8px rgba(0, 0, 0, 0.16);
+	font-size: 12px;
+	font-weight: 600;
+	color: color-mix(in srgb, var(--text) 92%, var(--muted-foreground));
+	text-align: left;
+}
+
+.goal-date-trigger:hover {
+	border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+	transform: translateY(-1px);
+}
+
+.goal-date-trigger:focus-visible,
+.goal-date-trigger--open {
+	outline: none;
+	border-color: color-mix(in srgb, var(--primary) 62%, var(--border));
+	box-shadow:
+		inset 0 1px 0 color-mix(in srgb, var(--text) 10%, transparent),
+		0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent),
+		0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
+.goal-date-icon {
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 16px;
+	height: 16px;
+	display: grid;
+	place-items: center;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--text) 8%, transparent);
+	color: color-mix(in srgb, var(--text) 70%, var(--muted-foreground));
+	pointer-events: none;
+}
+
+.goal-date-icon svg {
+	display: block;
+}
+
+.goal-date-icon path {
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.7;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.goal-date-pop {
+	position: absolute;
+	top: calc(100% + 6px);
+	left: 0;
+	z-index: 96;
+	width: 100%;
+	min-width: 240px;
+	padding: 8px;
+	border-radius: 12px;
+	border: 1px solid color-mix(in srgb, var(--primary) 26%, var(--border));
+	background: color-mix(in srgb, var(--surface) 92%, var(--muted) 8%);
+	box-shadow:
+		0 14px 28px rgba(0, 0, 0, 0.25),
+		inset 0 1px 0 color-mix(in srgb, var(--text) 10%, transparent);
+	animation: fadeUp 0.16s ease-out;
+	display: grid;
+	gap: 8px;
+}
+
+.goal-date-head {
+	display: grid;
+	grid-template-columns: 28px 1fr 28px;
+	align-items: center;
+	gap: 6px;
+}
+
+.goal-date-nav {
+	height: 28px;
+	border-radius: 8px;
+	border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+	background: color-mix(in srgb, var(--surface) 88%, var(--muted) 12%);
+	color: color-mix(in srgb, var(--text) 90%, var(--muted-foreground));
+	font-size: 18px;
+	line-height: 1;
+}
+
+.goal-date-nav:hover {
+	background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+	color: var(--text);
+}
+
+.goal-date-month {
+	text-align: center;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.01em;
+	color: color-mix(in srgb, var(--text) 92%, var(--muted-foreground));
+}
+
+.goal-date-weekdays {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 4px;
+}
+
+.goal-date-weekday-label {
+	height: 22px;
+	display: grid;
+	place-items: center;
+	font-size: 10px;
+	font-weight: 700;
+	color: color-mix(in srgb, var(--muted-foreground) 85%, var(--text));
+}
+
+.goal-date-grid {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 4px;
+}
+
+.goal-date-day {
+	height: 28px;
+	border: 0;
+	border-radius: 8px;
+	background: transparent;
+	color: color-mix(in srgb, var(--text) 88%, var(--muted-foreground));
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.goal-date-day:hover {
+	background: color-mix(in srgb, var(--primary) 12%, transparent);
+	color: var(--text);
+}
+
+.goal-date-day--outside {
+	opacity: 0.45;
+}
+
+.goal-date-day--today {
+	outline: 1px solid color-mix(in srgb, var(--primary) 45%, transparent);
+}
+
+.goal-date-day--selected {
+	background: color-mix(in srgb, var(--primary) 22%, transparent);
+	color: var(--text);
+	outline: 1px solid color-mix(in srgb, var(--primary) 55%, transparent);
+}
+
 .goal-repeat-wrap {
 	position: relative;
 }
@@ -763,6 +933,41 @@ select:focus {
 .goal-weekday input {
 	width: 14px;
 	height: 14px;
+}
+
+.goal-weekdays-readonly {
+	display: grid;
+	gap: 8px;
+}
+
+.goal-weekdays-readonly-label {
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--muted-foreground);
+}
+
+.goal-weekdays-readonly-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.goal-weekday-chip {
+	display: inline-flex;
+	align-items: center;
+	height: 22px;
+	padding: 0 8px;
+	border-radius: 999px;
+	border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border));
+	background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+	color: var(--text);
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.goal-weekdays-readonly-empty {
+	font-size: 11px;
+	color: var(--muted-foreground);
 }
 
 .wheel {
@@ -1129,4 +1334,20 @@ select:focus {
 		transform 0.12s ease;
 	pointer-events: none;
 	white-space: normal;
+}
+
+.cell-preview-selected {
+	position: relative;
+}
+
+.cell-preview-selected::after {
+	content: "";
+	position: absolute;
+	inset: 3px;
+	border-radius: 8px;
+	pointer-events: none;
+	background: color-mix(in srgb, var(--primary) 12%, var(--background));
+	box-shadow: inset 0 0 0 1px
+		color-mix(in srgb, var(--primary) 45%, transparent);
+	opacity: 0.8;
 }

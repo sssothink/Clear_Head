@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { addDays } from "date-fns";
+import { addDays, differenceInDays } from "date-fns";
 import { formatISODate } from "@/shared/lib/date";
 import { DAY_MINUTES, minutesToTime, timeToMinutes } from "@/shared/lib/time";
 import {
@@ -24,10 +24,7 @@ type SubmitPayload = {
 
 type GoalOperations = Pick<
 	ReturnType<typeof useOptimisticGoals>,
-	| "createGoal"
-	| "updateGoal"
-	| "detachOccurrence"
-	| "updateGoalFromDate"
+	"createGoal" | "updateGoal" | "detachOccurrence" | "updateGoalFromDate"
 >;
 
 type UseDashboardInteractionsParams = {
@@ -73,12 +70,7 @@ export function useDashboardInteractions({
 	setEditingEvent,
 	goalOperations,
 }: UseDashboardInteractionsParams) {
-	const {
-		createGoal,
-		updateGoal,
-		detachOccurrence,
-		updateGoalFromDate,
-	} =
+	const { createGoal, updateGoal, detachOccurrence, updateGoalFromDate } =
 		goalOperations;
 
 	const onEdit = useCallback(
@@ -98,18 +90,26 @@ export function useDashboardInteractions({
 				const isRecurring = editingEvent.recurrence_type !== "none";
 
 				if (!isRecurring) {
+					const nextDayIndex = differenceInDays(
+						new Date(data.date),
+						new Date(weekStart),
+					);
+
+					const isInCurrentWeek = nextDayIndex >= 0 && nextDayIndex <= 6;
 					updateGoal(editingEvent.goal_id, {
 						title: data.title,
 						description: data.description,
 						start_time: data.start_time,
 						end_time: data.end_time,
+						start_date: data.date,
+						...(isInCurrentWeek ? { dayIndex: nextDayIndex } : {}),
 					});
 					setEditingEvent(null);
 					return;
 				}
 
 				if (data.edit_scope === "future") {
-					updateGoalFromDate(editingEvent, {
+					updateGoalFromDate(editingEvent, data.date, {
 						title: data.title,
 						description: data.description,
 						start_time: data.start_time,
@@ -118,9 +118,15 @@ export function useDashboardInteractions({
 						recurrence_days: data.recurrence_days ?? null,
 					});
 				} else {
+					const newDayIndex = differenceInDays(
+						new Date(data.date),
+						new Date(weekStart),
+					);
+					const isInCurrentWeek = newDayIndex >= 0 && newDayIndex <= 6;
 					detachOccurrence({
 						event: editingEvent,
 						newDate: editingEvent.occurrence_date,
+						newDayIndex: isInCurrentWeek ? newDayIndex : undefined,
 						patch: {
 							title: data.title,
 							description: data.description,
@@ -140,7 +146,7 @@ export function useDashboardInteractions({
 				description: data.description,
 				start_time: data.start_time,
 				end_time: data.end_time,
-				date: selectedSlot.date,
+				date: data.date,
 				recurrence_type: data.recurrence_type,
 				recurrence_days: data.recurrence_days,
 			});
@@ -155,6 +161,7 @@ export function useDashboardInteractions({
 			setSelectedSlot,
 			updateGoal,
 			updateGoalFromDate,
+			weekStart,
 		],
 	);
 

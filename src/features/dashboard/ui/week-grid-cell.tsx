@@ -40,10 +40,14 @@ export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 		}
 	};
 	const cellRef = useRef<HTMLDivElement | null>(null);
+	const isPreviewSelected =
+		selectedSlot?.dayIndex === dayIndex &&
+		selectedSlot?.hourIndex === hourIndex;
 
 	const toggleCollapseKeepingCellPosition = (
 		applyToggle: () => void,
 		onAfterLayout?: () => void,
+		keepViewport = true,
 	) => {
 		const el = cellRef.current;
 		if (!el) {
@@ -65,7 +69,7 @@ export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 			const afterTop = afterEl.getBoundingClientRect().top;
 			const delta = afterTop - beforeTop;
 
-			if (Math.abs(delta) > 0.5) {
+			if (Math.abs(delta) > 0.5 && keepViewport) {
 				window.scrollBy({ top: delta, left: 0, behavior: "auto" });
 			}
 
@@ -79,6 +83,7 @@ export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 		<div
 			ref={cellRef}
 			className={`border-r border-b border-border bg-background hover:bg-muted/60 transition-colors
+				${isPreviewSelected ? "cell-preview-selected" : ""}
 				${isDragOver ? "bg-primary/15" : ""}
 			`}
 			onClick={(e) => {
@@ -92,7 +97,9 @@ export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 
 				if (selectedSlot || editingEvent) {
 					if (shouldExpand) {
-						toggleCollapseKeepingCellPosition(() => setIsCollapsedManual(false));
+						toggleCollapseKeepingCellPosition(() =>
+							setIsCollapsedManual(false),
+						);
 					} else if (shouldCollapse) {
 						toggleCollapseKeepingCellPosition(() => setIsCollapsedManual(true));
 					}
@@ -112,6 +119,7 @@ export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 					toggleCollapseKeepingCellPosition(
 						() => setIsCollapsedManual(false),
 						openFromCurrentCell,
+						false,
 					);
 					return;
 				}
@@ -120,6 +128,7 @@ export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 					toggleCollapseKeepingCellPosition(
 						() => setIsCollapsedManual(true),
 						openFromCurrentCell,
+						false,
 					);
 					return;
 				}

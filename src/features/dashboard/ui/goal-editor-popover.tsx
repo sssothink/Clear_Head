@@ -23,6 +23,21 @@ function clamp(value: number, min: number, max: number) {
 	return Math.min(Math.max(value, min), max);
 }
 
+function normalizeText(value?: string | null) {
+	return (value ?? "").trim();
+}
+
+function sortedNumbers(value?: number[] | null) {
+	return [...(value ?? [])].sort((a, b) => a - b);
+}
+
+function sameNumberArray(a?: number[] | null, b?: number[] | null) {
+	const left = sortedNumbers(a);
+	const right = sortedNumbers(b);
+	if (left.length !== right.length) return false;
+	return left.every((v, i) => v === right[i]);
+}
+
 type GoalModalProps = {
 	slot?: SelectedSlot;
 	onClose: () => void;
@@ -72,12 +87,12 @@ export default function GoalEditorPopover({
 	const titleDefault = initialData?.title;
 	const descriptionDefault = initialData?.description;
 	const popoverRef = useRef<HTMLDivElement | null>(null);
-	const titleRef = useRef(titleDefault ?? "");
-	const descriptionRef = useRef(descriptionDefault ?? "");
 	const { suppressNextOpenRef } = useDashboard();
 
 	type PanelPosition = { top: number; left: number };
 	const [date, setDate] = useState(dateDefault ?? "");
+	const [title, setTitle] = useState(titleDefault ?? "");
+	const [description, setDescription] = useState(descriptionDefault ?? "");
 	const [startTime, setStartTime] = useState(startHour);
 	const [endTime, setEndTime] = useState(endHour);
 	const [recurrence, setRecurrence] = useState<RecurrenceType>(
@@ -107,6 +122,9 @@ export default function GoalEditorPopover({
 		initialData.recurrence_type &&
 		initialData.recurrence_type !== "none",
 	);
+	const isRecurringDateChanged = Boolean(
+		isRecurringEdit && initialData?.date && date !== initialData.date,
+	);
 	const isSingleEdit = Boolean(
 		initialData && initialData.recurrence_type === "none",
 	);
@@ -115,12 +133,46 @@ export default function GoalEditorPopover({
 	const recurrenceOptions: RecurrenceType[] = !isEdit
 		? ["none", "daily", "weekly"]
 		: isRecurringEdit && currentRecurrence
-			? Array.from(new Set<RecurrenceType>(["none", currentRecurrence]))
+			? currentRecurrence === "weekly"
+				? ["none"]
+				: Array.from(new Set<RecurrenceType>(["none", currentRecurrence]))
 			: ["none"];
+	const isTitleEmpty = normalizeText(title).length === 0;
+
+	const isDirty = !isEdit
+		? true
+		: (() => {
+				if (!initialData) return false;
+				return (
+					normalizeText(title) !== normalizeText(initialData.title) ||
+					normalizeText(description) !== normalizeText(initialData.description) ||
+					date !== initialData.date ||
+					startTime !== initialData.start_time ||
+					endTime !== initialData.end_time ||
+					recurrence !== (initialData.recurrence_type ?? "none") ||
+					!sameNumberArray(
+						recurrence === "weekly" ? recurrenceDays : [],
+						(initialData.recurrence_type ?? "none") === "weekly"
+							? (initialData.recurrence_days ?? [])
+							: [],
+					)
+				);
+			})();
 
 	const handlePrimaryUpdate = () => {
+		if (isTitleEmpty) {
+			setError("Title is required.");
+			return;
+		}
+		if (isEdit && !isDirty) return;
 		if (!isRecurringEdit) {
 			handleSubmitClick();
+			return;
+		}
+		// For recurring tasks, changing the date means "move only this occurrence"
+		// and detach it to a one-time task without additional scope prompt.
+		if (isRecurringDateChanged) {
+			handleSubmitClick("single");
 			return;
 		}
 		setScopePrompt("update");
@@ -248,6 +300,10 @@ export default function GoalEditorPopover({
 	const handleSubmitClick = (scope?: "single" | "future") => {
 		if (!date) return;
 		setError(null);
+		if (isTitleEmpty) {
+			setError("Title is required.");
+			return;
+		}
 
 		if (!isQuarterHour(startTime) || !isQuarterHour(endTime)) {
 			setError("Time must be in 15-minute increments.");
@@ -263,8 +319,8 @@ export default function GoalEditorPopover({
 		}
 
 		onSubmit({
-			title: titleRef.current,
-			description: descriptionRef.current,
+			title,
+			description,
 			start_time: startTime,
 			end_time: endTime,
 			date,
@@ -304,17 +360,19 @@ export default function GoalEditorPopover({
 				defaultTitle={titleDefault}
 				defaultDescription={descriptionDefault}
 				onTitleChange={(value) => {
-					titleRef.current = value;
+					setTitle(value);
+					if (error && normalizeText(value).length > 0) {
+						setError(null);
+					}
 				}}
-				onDescriptionChange={(value) => {
-					descriptionRef.current = value;
-				}}
+				onDescriptionChange={setDescription}
 			/>
 
 			<GoalActions
 				isEdit={isEdit}
 				onSubmit={handlePrimaryUpdate}
 				onDelete={isEdit ? handlePrimaryDelete : undefined}
+				disableSubmit={isTitleEmpty || (isEdit && !isDirty)}
 			/>
 
 			{scopePrompt && (
@@ -339,6 +397,7 @@ export default function GoalEditorPopover({
 				recurrence={recurrence}
 				recurrenceOptions={recurrenceOptions}
 				showRecurrenceControls={!isSingleEdit}
+				allowWeeklyDayEditing={!isEdit}
 				recurrenceDays={recurrenceDays}
 				onDateChange={setDate}
 				onStartTimeChange={(value) => {

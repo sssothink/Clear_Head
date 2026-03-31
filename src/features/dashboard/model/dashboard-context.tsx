@@ -83,13 +83,7 @@ export function DashboardProvider({
 	weekStart: string;
 	children: React.ReactNode;
 }) {
-	const [hourHeight, setHourHeight] = useState(() => {
-		if (typeof window === "undefined") return 60;
-		const raw = window.localStorage.getItem("calendar-hour-height");
-		if (!raw) return 60;
-		const n = Number(raw);
-		return Number.isFinite(n) ? n : 60;
-	});
+	const [hourHeight, setHourHeight] = useState(60);
 
 	useEffect(() => {
 		window.localStorage.setItem("calendar-hour-height", String(hourHeight));

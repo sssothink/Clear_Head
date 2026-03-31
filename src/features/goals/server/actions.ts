@@ -258,5 +258,62 @@ export async function splitGoalSeriesFromDateAction(params: {
 		throw createError;
 	}
 
+	// Carry forward per-occurrence overrides/deletions for the future segment.
+	// Without this, previously deleted/moved occurrences may reappear in the new series.
+	const { data: oldOccurrences, error: occLoadError } = await supabase
+		.from("goal_occurrences")
+		.select(
+			"date, status, title, description, start_time, end_time, is_deleted",
+		)
+		.eq("goal_id", goal.id)
+		.eq("owner_id", user.id)
+		.gte("date", params.fromDate);
+
+	if (occLoadError) {
+		await supabase
+			.from("goals")
+			.update({ is_deleted: true })
+			.eq("id", created.id)
+			.eq("owner_id", user.id);
+		await supabase
+			.from("goals")
+			.update({ recurrence_end: goal.recurrence_end })
+			.eq("id", goal.id)
+			.eq("owner_id", user.id);
+		throw occLoadError;
+	}
+
+	if (oldOccurrences && oldOccurrences.length > 0) {
+		const clonedOccurrences = oldOccurrences.map((row) => ({
+			goal_id: created.id,
+			owner_id: user.id,
+			date: row.date,
+			status: row.status,
+			title: row.title,
+			description: row.description,
+			start_time: row.start_time,
+			end_time: row.end_time,
+			is_deleted: row.is_deleted,
+		}));
+
+		const { error: occCopyError } = await supabase
+			.from("goal_occurrences")
+			.upsert(clonedOccurrences, { onConflict: "goal_id,date" });
+
+		if (occCopyError) {
+			await supabase
+				.from("goals")
+				.update({ is_deleted: true })
+				.eq("id", created.id)
+				.eq("owner_id", user.id);
+			await supabase
+				.from("goals")
+				.update({ recurrence_end: goal.recurrence_end })
+				.eq("id", goal.id)
+				.eq("owner_id", user.id);
+			throw occCopyError;
+		}
+	}
+
 	return created;
 }

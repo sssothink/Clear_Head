@@ -355,6 +355,7 @@ export function useGoalActions(
 
 	const updateGoalFromDate = (
 		event: DayEvent,
+		fromDate: string,
 		data: EventUpdateInput & {
 			recurrence_type: RecurrenceType;
 			recurrence_days?: number[] | null;
@@ -364,7 +365,7 @@ export function useGoalActions(
 			try {
 				await splitGoalSeriesFromDateAction({
 					goalId: event.goal_id,
-					fromDate: event.occurrence_date,
+					fromDate,
 					updates: {
 						title: data.title,
 						description: data.description,
