@@ -1076,10 +1076,14 @@ select:focus {
 	}
 }
 
-.collapse-toggle {
+.collapse-toggle-wrap {
 	position: absolute;
 	left: -8px;
 	z-index: 20;
+}
+
+.collapse-toggle {
+	position: relative;
 	height: 24px;
 	padding: 0 8px;
 	border-radius: 999px;
@@ -1089,6 +1093,40 @@ select:focus {
 	font-size: 11px;
 	font-weight: 600;
 }
+
 .collapse-toggle:hover {
 	border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+}
+
+.collapse-toggle:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	border-color: var(--border);
+}
+
+.collapse-toggle-wrap:hover .collapse-tooltip {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.collapse-tooltip {
+	position: absolute;
+	top: -100%;
+	left: 2em;
+	width: max-content;
+	padding: 6px 8px;
+	border-radius: 8px;
+	border: 1px solid var(--border);
+	background: var(--surface);
+	color: var(--text);
+	font-size: 11px;
+	line-height: 1.25;
+	box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+	opacity: 0;
+	transform: translateY(-2px);
+	transition:
+		opacity 0.12s ease,
+		transform 0.12s ease;
+	pointer-events: none;
+	white-space: normal;
 }

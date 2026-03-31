@@ -68,6 +68,8 @@ export default function WeekGrid() {
 
 	const collapseBoundaryTop = minuteToY(8 * 60, hourHeight, isCollapsed);
 
+	const collapseDisabled = !isCollapsed && hasEarlyTasks;
+
 	return (
 		<div ref={gridRef} className="flex-1">
 			<div className="relative bg-background">
@@ -97,17 +99,34 @@ export default function WeekGrid() {
 					{`${String(currentHour).padStart(2, "0")}:${String(currentMinute).padStart(2, "0")}`}
 				</div>
 
-				<button
-					type="button"
-					className="collapse-toggle"
-					style={{ top: collapseBoundaryTop - 12 }}
-					onClick={() => {
-						if (!isCollapsed && hasEarlyTasks) return;
-						setIsCollapsedManual((v) => !v);
-					}}
+				<div
+					className="collapse-toggle-wrap"
+					style={{ top: collapseBoundaryTop + 6 }}
 				>
-					{isCollapsed ? "Expand 00-08" : "Collapse 00-08"}
-				</button>
+					<button
+						type="button"
+						className="collapse-toggle"
+						disabled={collapseDisabled}
+						aria-disabled={collapseDisabled}
+						aria-describedby={collapseDisabled ? "collapse-tooltip" : undefined}
+						onClick={() => {
+							if (collapseDisabled) return;
+							setIsCollapsedManual((v) => !v);
+						}}
+					>
+						{isCollapsed ? "Expand 00-08" : "Collapse 00-08"}
+					</button>
+
+					{collapseDisabled && (
+						<div
+							id="collapse-tooltip"
+							role="tooltip"
+							className="collapse-tooltip"
+						>
+							Сжать зону нельзя: в диапазоне 00:00-08:00 есть задачи.
+						</div>
+					)}
+				</div>
 
 				<div
 					style={{ top: `${currentTimeTop}px` }}
