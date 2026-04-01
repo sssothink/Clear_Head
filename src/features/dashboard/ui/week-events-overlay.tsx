@@ -81,7 +81,7 @@ export default function WeekEventsOverlay() {
 							onEdit(event.id);
 						}}
 						className={cn(
-							"event absolute pointer-events-auto justify-between p-3 transition-all group",
+							"event absolute pointer-events-auto justify-between p-3 transition-all duration-150 hover:-translate-y-px",
 							isCompact && "event--compact",
 							event.status === "completed" && "event--completed",
 							draggedEventId === event.id && "opacity-40 scale-90",

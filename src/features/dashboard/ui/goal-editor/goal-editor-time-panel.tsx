@@ -21,6 +21,7 @@ import {
 	isEndOptionDisabled,
 	TIME_OPTIONS,
 } from "@/shared/lib/time";
+import { toHHMM } from "@/lib/utils";
 import { Button } from "@/shared/ui";
 import { useOutsideClick } from "@/features/goals/hooks/useOutsideClick";
 
@@ -260,7 +261,7 @@ export function GoalTimePanel({
 						className={`goal-time-chip ${activePicker === "start" ? "goal-time-chip--active" : ""}`}
 						onClick={() => openPicker("start")}
 					>
-						{startTime}
+						{toHHMM(startTime)}
 					</button>
 					-
 					<button
@@ -269,7 +270,7 @@ export function GoalTimePanel({
 						className={`goal-time-chip ${activePicker === "end" ? "goal-time-chip--active" : ""}`}
 						onClick={() => openPicker("end")}
 					>
-						{endTime}
+						{toHHMM(endTime)}
 					</button>
 				</div>
 

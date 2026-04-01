@@ -8,13 +8,16 @@ export default function HomePage() {
 						<h2 className="mt-3 text-3xl font-semibold tracking-tight">
 							Сосредоточься на важном
 						</h2>
-						<p className="mt-2 text-base" style={{ color: "var(--muted)" }}>
+						<p
+							className="mt-2 text-base"
+							style={{ color: "var(--muted-foreground)" }}
+						>
 							Планируй задачи, отслеживай прогресс и освобождай голову от
 							лишнего.
 						</p>
 
 						<div className="mt-6 flex gap-3">
-							<button className="rounded-lg bg-primary px-4 py-2 text-white text-sm">
+							<button className="rounded-lg bg-primary px-4 py-2 text-primary-foreground text-sm">
 								Начать
 							</button>
 							<button className="rounded-lg border px-4 py-2 text-sm">
@@ -28,19 +31,28 @@ export default function HomePage() {
 				<div className="container grid gap-4 md:grid-cols-3">
 					<div className="fade-up card p-6">
 						<h3 className="text-lg font-semibold">Ясные приоритеты</h3>
-						<p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>
+						<p
+							className="mt-2 text-sm"
+							style={{ color: "var(--muted-foreground)" }}
+						>
 							Фильтрация и статус‑метки для контроля нагрузки.
 						</p>
 					</div>
 					<div className="fade-up card p-6">
 						<h3 className="text-lg font-semibold">Контроль времени</h3>
-						<p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>
+						<p
+							className="mt-2 text-sm"
+							style={{ color: "var(--muted-foreground)" }}
+						>
 							Планируй прогресс и отслеживай время, чтобы получить больше.
 						</p>
 					</div>
 					<div className="fade-up card p-6">
 						<h3 className="text-lg font-semibold">Отслеживание финансов</h3>
-						<p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>
+						<p
+							className="mt-2 text-sm"
+							style={{ color: "var(--muted-foreground)" }}
+						>
 							Контролируй расходы и планируй важные покупки.
 						</p>
 					</div>

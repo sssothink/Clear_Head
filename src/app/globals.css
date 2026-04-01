@@ -1,37 +1,39 @@
 @import "tailwindcss";
 
 :root {
-	--bg: #0b0e13;
-	--surface: #121720;
-	--text: #f3f6fb;
-	--btn-text: #bbbbbb;
-
-	--muted: #1a212d;
-	--muted-foreground: #c8cdd3;
-
-	--border: #2a3442;
-	--input: #171e29;
-
-	--primary: #6ee7ff;
-	--primary-foreground: #03131a;
-	--primary-weak: #123241;
-
-	--secondary: #1a212d;
-	--secondary-foreground: #f3f6fb;
-
-	--accent: #f472b6;
-	--accent-foreground: #fff1f8;
-
-	--destructive: #b91c1c;
+	--bg: #0d0d0d;
+	--text: #edf1f5;
+	--btn-text: #f8fafc;
+	--muted: rgb(30, 31, 32);
+	--muted-foreground: #8f98a3;
+	--border: rgba(255, 255, 255, 0.08);
+	--input: rgba(255, 255, 255, 0.04);
+	--primary: #e7eaee;
+	--primary-foreground: #0f1114;
+	--secondary: #2c2d2e;
+	--secondary-foreground: #edf1f5;
+	--accent: #c8d0d8;
+	--accent-foreground: #0f1114;
+	--destructive: #dc2626;
 	--destructive-foreground: #ffffff;
-
-	--ring: #9ca3af;
+	--ring: #d1d5db;
+	--card: rgba(22, 22, 22, 0.92);
+	--popover: rgba(52, 52, 52, 0.96);
+	--shadow: rgba(0, 0, 0, 0.22);
+	--panel-subtle: rgb(41, 41, 41);
+	--panel-hover: rgba(255, 255, 255, 0.612);
+	--panel-strong: rgba(255, 255, 255, 0.06);
+	--event: rgb(52, 96, 197);
+	--event-strong: #322b8a;
+	--event-border: rgba(62, 63, 68, 0.72);
+	--event-text: #f8fafc;
+	--event-meta: rgba(241, 245, 249, 0.76);
+	--event-pill: rgba(255, 255, 255, 0.16);
+	--event-shadow: rgba(7, 12, 20, 0.2);
 
 	--background: var(--bg);
 	--foreground: var(--text);
-	--card: var(--surface);
 	--card-foreground: var(--text);
-	--popover: var(--surface);
 	--popover-foreground: var(--text);
 }
 
@@ -59,45 +61,8 @@
 	--font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-	:root {
-		--bg: rgb(35, 35, 35);
-		--surface: #333435;
-		--text: #fcfcfc;
-		--btn-text: #e7e7e7;
-
-		--muted: #3d475b;
-		--muted-foreground: #a0a0a0;
-
-		--border: #000000;
-		--input: #557cb7;
-
-		--primary: #ffffff;
-		--primary-foreground: rgb(61, 61, 61);
-		--primary-weak: #4d6aa4;
-
-		--secondary: #171e2a;
-		--secondary-foreground: #f8fbff;
-
-		--accent: #9ca3ff;
-		--accent-foreground: #fff3f9;
-
-		--destructive: rgb(216, 69, 69);
-		--destructive-foreground: #ff4b4b;
-
-		--ring: #bbc0c7;
-
-		--background: var(--bg);
-		--foreground: var(--text);
-		--card: var(--surface);
-		--card-foreground: var(--text);
-		--popover: var(--surface);
-		--popover-foreground: var(--text);
-	}
-}
-
 body {
-	background: var(--background);
+	background: linear-gradient(180deg, #0d1014 0%, #090b0e 100%);
 	color: var(--foreground);
 	font-family: var(--font-brand), system-ui, sans-serif;
 }
@@ -121,9 +86,9 @@ nav a {
 }
 
 nav a:hover {
-	background: var(--muted);
+	background: var(--panel-subtle);
 	border-color: var(--border);
-	color: var(--accent);
+	color: var(--primary);
 }
 
 a,
@@ -149,18 +114,16 @@ button:hover {
 	display: grid;
 	place-items: center;
 	padding: 32px 24px 64px;
-	background:
-		radial-gradient(1200px 600px at 20% -10%, #1b2432 0%, transparent 60%),
-		radial-gradient(900px 500px at 110% 0%, #182536 0%, transparent 55%);
+	background: linear-gradient(180deg, #0d1014 0%, #090b0e 100%);
 }
 
 .auth-card {
 	width: min(440px, 100%);
-	background: var(--surface);
+	background: var(--card);
 	border: 1px solid var(--border);
-	border-radius: 20px;
+	border-radius: 18px;
 	padding: 28px;
-	box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
 }
 
 .auth-head h1 {
@@ -213,14 +176,14 @@ textarea:-webkit-autofill,
 select:-webkit-autofill {
 	-webkit-text-fill-color: var(--text);
 	transition: background-color 9999s ease-in-out 0s;
-	box-shadow: 0 0 0px 1000px var(--surface) inset;
+	box-shadow: 0 0 0px 1000px var(--card) inset;
 	border-color: var(--border);
 }
 
 input:autofill,
 textarea:autofill,
 select:autofill {
-	box-shadow: 0 0 0px 1000px var(--surface) inset;
+	box-shadow: 0 0 0px 1000px var(--card) inset;
 	-webkit-text-fill-color: var(--text);
 }
 
@@ -228,6 +191,7 @@ select:autofill {
 	height: 44px;
 	border-radius: 10px;
 	background: var(--primary);
+	color: var(--primary-foreground);
 	font-weight: 600;
 	border: none;
 	cursor: pointer;
@@ -237,7 +201,8 @@ select:autofill {
 	height: 44px;
 	border-radius: 10px;
 	border: 1px solid var(--border);
-	background: var(--surface);
+	background: var(--card);
+	color: var(--text);
 	font-weight: 600;
 }
 
@@ -253,10 +218,14 @@ select:autofill {
 }
 
 .card {
-	background: var(--surface);
+	position: relative;
+	overflow: hidden;
+	background: var(--card);
 	border: 1px solid var(--border);
 	border-radius: 16px;
-	box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	box-shadow: 0 10px 24px var(--shadow);
 }
 
 .section {
@@ -273,94 +242,21 @@ select:autofill {
 }
 
 .glass {
-	@apply relative overflow-hidden rounded-2xl;
-	background: rgba(24, 24, 27, 0.55);
-	backdrop-filter: blur(20px) saturate(180%);
-	-webkit-backdrop-filter: blur(20px) saturate(180%);
-	border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.glass::before {
-	content: "";
-	position: absolute;
-	inset: 0;
-	background: linear-gradient(
-		135deg,
-		rgba(255, 255, 255, 0.12),
-		rgba(255, 255, 255, 0.02)
-	);
-	pointer-events: none;
-}
-
-.glass::after {
-	content: "";
-	position: absolute;
-	inset: 0;
-	border-radius: inherit;
-	box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08);
-	pointer-events: none;
-}
-
-.card-glow {
-	box-shadow:
-		0 0 0 1px rgba(225, 225, 225, 0.15),
-		0 5px 150px rgba(228, 228, 228, 0.08);
-}
-
-.card-glow-hover:hover {
-	box-shadow:
-		0 0 0 1px rgba(79, 70, 229, 0.28),
-		0 6px 20px rgba(226, 226, 226, 0.15);
-}
-
-.task-button {
-	@apply rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200;
-}
-
-.task-button:hover {
-	transform: translateY(-1px);
-}
-
-.task-button:active {
-	transform: scale(0.96);
-}
-
-.form-glow:focus-within {
-	box-shadow:
-		0 0 0 1px rgba(79, 70, 229, 0.28),
-		0 6px 20px rgba(226, 226, 226, 0.15);
-}
-
-@keyframes subtlePulse {
-	0% {
-		box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.35);
-	}
-	70% {
-		box-shadow: 0 0 0 8px rgba(79, 70, 229, 0);
-	}
-	100% {
-		box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
-	}
-}
-
-.pulse-button {
-	animation: subtlePulse 2.5s infinite;
+	@apply overflow-hidden rounded-2xl;
+	background: var(--card);
+	backdrop-filter: blur(14px);
+	-webkit-backdrop-filter: blur(14px);
+	border: 1px solid var(--border);
 }
 
 .event {
 	@apply flex flex-col gap-2 rounded-xl p-3;
 	min-width: 0;
 	overflow: hidden;
-	background: linear-gradient(
-		160deg,
-		rgba(99, 102, 241, 0.96),
-		rgba(79, 70, 229, 0.96)
-	);
-	color: #ffffff;
-	border: 1px solid rgba(255, 255, 255, 0.28);
-	box-shadow:
-		0 10px 24px rgba(79, 70, 229, 0.24),
-		inset 0 1px 0 rgba(255, 255, 255, 0.16);
+	background: var(--event);
+	color: var(--event-text);
+	box-shadow: 0 8px 18px
+		color-mix(in srgb, var(--event-shadow) 90%, transparent);
 }
 
 .event-header {
@@ -375,7 +271,7 @@ select:autofill {
 	height: 14px;
 	margin: 0;
 	border-radius: 4px;
-	border: 1px solid rgba(255, 255, 255, 0.7);
+	border: 1px solid color-mix(in srgb, var(--event-text) 42%, transparent);
 	background: transparent;
 	appearance: none;
 	cursor: pointer;
@@ -389,25 +285,21 @@ select:autofill {
 	margin-top: -3px;
 	width: 5px;
 	height: 9px;
-	border: 2px solid rgba(255, 255, 255, 0.95);
+	border: 2px solid var(--event-text);
 	border-top: 0;
 	border-left: 0;
 	transform: rotate(40deg);
 }
 
 .event-checkbox:checked {
-	border-color: rgba(255, 255, 255, 0.9);
+	border-color: color-mix(in srgb, var(--event-text) 72%, transparent);
 }
 
 .event--completed {
-	background: linear-gradient(
-		160deg,
-		rgba(71, 85, 105, 0.92),
-		rgba(51, 65, 85, 0.92)
-	);
-	border-color: rgba(255, 255, 255, 0.18);
-	color: rgba(255, 255, 255, 0.9);
-	filter: saturate(0.75) brightness(0.8);
+	background: #4a515c;
+	border-color: rgba(255, 255, 255, 0.08);
+	color: color-mix(in srgb, var(--foreground) 72%, var(--muted-foreground));
+	filter: saturate(0.82);
 }
 
 .event--compact {
@@ -433,7 +325,7 @@ select:autofill {
 
 .event-meta {
 	font-size: 11px;
-	color: rgba(255, 255, 255, 0.8);
+	color: var(--event-meta);
 	margin-top: 2px;
 	white-space: nowrap;
 	overflow: hidden;
@@ -449,38 +341,50 @@ select:autofill {
 	font-size: 10px;
 	font-weight: 600;
 	margin-top: 6px;
-	background: rgba(255, 255, 255, 0.16);
-	color: rgba(255, 255, 255, 0.92);
+	background: var(--event-pill);
+	color: color-mix(in srgb, var(--event-text) 88%, white);
 	max-width: 100%;
 }
 
 .goal-popover {
 	position: absolute;
+	overflow: visible;
+	isolation: isolate;
+	will-change: backdrop-filter;
 	z-index: 50;
 	width: 320px;
-	background: var(--surface);
+	background: var(--popover);
 	border: 1px solid var(--border);
 	border-radius: 12px;
-	box-shadow:
-		0 12px 28px rgba(0, 0, 0, 0.28),
-		0 2px 10px rgba(0, 0, 0, 0.2);
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
+	box-shadow: 0 14px 30px color-mix(in srgb, var(--shadow) 85%, transparent);
 	padding: 8px;
+}
+
+.goal-popover::before,
+.goal-time-popover::before,
+.scope-modal::before {
+	content: none;
 }
 
 .goal-time-popover {
 	position: absolute;
+	overflow: visible;
+	isolation: isolate;
+	will-change: backdrop-filter;
 	border: 1px solid var(--border);
 	border-radius: 12px;
 	z-index: 70;
 	width: 260px;
-	background: var(--surface);
+	background: var(--popover);
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
 }
 
 .goal-popover,
 .goal-time-popover {
-	box-shadow:
-		0 10px 24px rgba(0, 0, 0, 0.408),
-		0 2px 8px rgba(0, 0, 0, 0.358);
+	box-shadow: 0 12px 26px color-mix(in srgb, var(--shadow) 88%, transparent);
 }
 
 .goal-header {
@@ -491,7 +395,7 @@ select:autofill {
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
-	background: var(--surface);
+	background: var(--panel-subtle);
 	color: var(--text);
 	padding: 6px 10px;
 	border-radius: 8px;
@@ -558,8 +462,10 @@ select:autofill {
 	border: 1px solid var(--border);
 	padding: 12px;
 	border-radius: 10px;
-	background: var(--surface);
-	box-shadow: 0 10px 24px rgba(16, 24, 40, 0.12);
+	background: var(--panel-subtle);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	box-shadow: none;
 	display: grid;
 	gap: 8px;
 }
@@ -607,14 +513,8 @@ select:autofill {
 	border-radius: 10px;
 	border: 1px solid
 		color-mix(in srgb, var(--muted-foreground) 35%, var(--border));
-	background: linear-gradient(
-		180deg,
-		color-mix(in srgb, var(--surface) 94%, var(--muted) 6%),
-		color-mix(in srgb, var(--surface) 88%, var(--muted) 12%)
-	);
-	box-shadow:
-		inset 0 1px 0 color-mix(in srgb, var(--text) 8%, transparent),
-		0 2px 8px rgba(0, 0, 0, 0.16);
+	background: var(--panel-subtle);
+	box-shadow: none;
 	font-size: 12px;
 	font-weight: 600;
 	color: color-mix(in srgb, var(--text) 92%, var(--muted-foreground));
@@ -630,10 +530,7 @@ select:autofill {
 .goal-date-trigger--open {
 	outline: none;
 	border-color: color-mix(in srgb, var(--primary) 62%, var(--border));
-	box-shadow:
-		inset 0 1px 0 color-mix(in srgb, var(--text) 10%, transparent),
-		0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent),
-		0 8px 18px rgba(0, 0, 0, 0.2);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
 .goal-date-icon {
@@ -646,8 +543,8 @@ select:autofill {
 	display: grid;
 	place-items: center;
 	border-radius: 999px;
-	background: color-mix(in srgb, var(--text) 8%, transparent);
-	color: color-mix(in srgb, var(--text) 70%, var(--muted-foreground));
+	background: var(--panel-hover);
+	color: var(--muted-foreground);
 	pointer-events: none;
 }
 
@@ -673,10 +570,10 @@ select:autofill {
 	padding: 8px;
 	border-radius: 12px;
 	border: 1px solid color-mix(in srgb, var(--primary) 26%, var(--border));
-	background: color-mix(in srgb, var(--surface) 92%, var(--muted) 8%);
-	box-shadow:
-		0 14px 28px rgba(0, 0, 0, 0.25),
-		inset 0 1px 0 color-mix(in srgb, var(--text) 10%, transparent);
+	background: var(--popover);
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
+	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25);
 	animation: fadeUp 0.16s ease-out;
 	display: grid;
 	gap: 8px;
@@ -693,14 +590,14 @@ select:autofill {
 	height: 28px;
 	border-radius: 8px;
 	border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
-	background: color-mix(in srgb, var(--surface) 88%, var(--muted) 12%);
-	color: color-mix(in srgb, var(--text) 90%, var(--muted-foreground));
+	background: var(--panel-subtle);
+	color: var(--text);
 	font-size: 18px;
 	line-height: 1;
 }
 
 .goal-date-nav:hover {
-	background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+	background: color-mix(in srgb, var(--primary) 12%, var(--card));
 	color: var(--text);
 }
 
@@ -777,14 +674,8 @@ select:autofill {
 	border-radius: 10px;
 	border: 1px solid
 		color-mix(in srgb, var(--muted-foreground) 35%, var(--border));
-	background: linear-gradient(
-		180deg,
-		color-mix(in srgb, var(--surface) 94%, var(--muted) 6%),
-		color-mix(in srgb, var(--surface) 88%, var(--muted) 12%)
-	);
-	box-shadow:
-		inset 0 1px 0 color-mix(in srgb, var(--text) 8%, transparent),
-		0 2px 8px rgba(0, 0, 0, 0.16);
+	background: var(--panel-subtle);
+	box-shadow: none;
 	transition:
 		border-color 0.16s ease,
 		box-shadow 0.16s ease,
@@ -800,17 +691,14 @@ select:autofill {
 .goal-repeat-field--open {
 	outline: none;
 	border-color: color-mix(in srgb, var(--primary) 62%, var(--border));
-	box-shadow:
-		inset 0 1px 0 color-mix(in srgb, var(--text) 10%, transparent),
-		0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent),
-		0 8px 18px rgba(0, 0, 0, 0.2);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
 .goal-repeat-value {
 	font-size: 12px;
 	font-weight: 600;
 	letter-spacing: 0.01em;
-	color: color-mix(in srgb, var(--text) 90%, var(--muted-foreground));
+	color: var(--text);
 }
 
 .goal-repeat-caret {
@@ -823,8 +711,8 @@ select:autofill {
 	display: grid;
 	place-items: center;
 	border-radius: 999px;
-	background: color-mix(in srgb, var(--text) 8%, transparent);
-	color: color-mix(in srgb, var(--text) 68%, var(--muted-foreground));
+	background: var(--panel-hover);
+	color: var(--muted-foreground);
 	pointer-events: none;
 	transition:
 		background-color 0.16s ease,
@@ -845,8 +733,8 @@ select:autofill {
 }
 
 .goal-repeat-wrap:hover .goal-repeat-caret {
-	background: color-mix(in srgb, var(--primary) 20%, transparent);
-	color: color-mix(in srgb, var(--primary) 62%, var(--text));
+	background: var(--panel-strong);
+	color: var(--text);
 }
 
 .goal-repeat-field--open + .goal-repeat-caret {
@@ -868,10 +756,10 @@ select:autofill {
 	padding: 6px;
 	border-radius: 12px;
 	border: 1px solid color-mix(in srgb, var(--primary) 26%, var(--border));
-	background: color-mix(in srgb, var(--surface) 92%, var(--muted) 8%);
-	box-shadow:
-		0 14px 28px rgba(0, 0, 0, 0.25),
-		inset 0 1px 0 color-mix(in srgb, var(--text) 10%, transparent);
+	background: var(--popover);
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
+	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25);
 }
 
 .goal-repeat-option {
@@ -884,7 +772,7 @@ select:autofill {
 	font-size: 12px;
 	font-weight: 600;
 	letter-spacing: 0.01em;
-	color: color-mix(in srgb, var(--text) 86%, var(--muted-foreground));
+	color: var(--text);
 	background: transparent;
 }
 
@@ -959,7 +847,7 @@ select:focus {
 	padding: 0 8px;
 	border-radius: 999px;
 	border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border));
-	background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+	background: color-mix(in srgb, var(--primary) 12%, var(--card));
 	color: var(--text);
 	font-size: 11px;
 	font-weight: 600;
@@ -973,14 +861,12 @@ select:focus {
 .wheel {
 	position: relative;
 	width: 100%;
-	height: 176px;
-	border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+	height: 192px;
+	border: 1px solid var(--border);
 	border-radius: 12px;
-	background: color-mix(in srgb, var(--surface) 96%, var(--muted) 4%);
+	background: var(--popover);
 	overflow: hidden;
-	box-shadow:
-		inset 0 0 0 1px color-mix(in srgb, var(--text) 6%, transparent),
-		0 8px 20px rgba(0, 0, 0, 0.28);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .wheel-track {
@@ -988,7 +874,7 @@ select:focus {
 	overflow-y: auto;
 	overscroll-behavior: contain;
 	scroll-snap-type: y mandatory;
-	padding-block: 72px;
+	padding-block: 80px;
 	scrollbar-width: none;
 }
 
@@ -1004,15 +890,11 @@ select:focus {
 	position: absolute;
 	left: 0;
 	right: 0;
-	top: 72px;
+	top: 80px;
 	height: 32px;
-	border-radius: 8px;
-
-	border: 1px solid color-mix(in srgb, var(--primary) 40%, var(--border));
-	background: color-mix(in srgb, var(--primary) 12%, transparent);
-	box-shadow:
-		inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent),
-		0 0 0 1px color-mix(in srgb, var(--primary) 22%, transparent);
+	border-top: 1px solid rgba(255, 255, 255, 0.08);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	background: rgba(255, 255, 255, 0.02);
 
 	pointer-events: none;
 	z-index: 3;
@@ -1024,37 +906,40 @@ select:focus {
 	position: absolute;
 	left: 0;
 	right: 0;
-	height: 44px;
+	height: 40px;
 	pointer-events: none;
 	z-index: 2;
 }
 .wheel::before {
 	top: 0;
-	background: linear-gradient(var(--surface), transparent);
+	background: linear-gradient(var(--popover), transparent);
 }
 .wheel::after {
 	bottom: 0;
-	background: linear-gradient(transparent, var(--surface));
+	background: linear-gradient(transparent, var(--popover));
 }
 
 .wheel-item {
 	scroll-snap-align: center;
 	width: 100%;
 	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	border: 0;
-	border-radius: 8px;
 	background: transparent;
 	color: var(--muted-foreground);
 	font-size: 13px;
 	font-weight: 500;
 	letter-spacing: 0.01em;
-	transition: all 0.14s ease;
+	transition:
+		color 0.14s ease,
+		font-weight 0.14s ease,
+		opacity 0.14s ease;
 }
 .wheel-item--selected {
-	background: color-mix(in srgb, var(--primary) 16%, var(--surface));
 	color: var(--text);
 	font-weight: 700;
-	outline: 1px solid color-mix(in srgb, var(--primary) 36%, transparent);
 }
 
 .wheel-item:disabled {
@@ -1077,8 +962,9 @@ select:focus {
 .goal-time-quick {
 	width: fit-content;
 	display: flex;
-	border-radius: 0.5em;
-	border: 1px solid var(--muted-foreground);
+	border-radius: 10px;
+	border: 1px solid var(--border);
+	background: var(--panel-subtle);
 	align-items: center;
 	grid-template-columns: 1fr 1fr;
 }
@@ -1090,6 +976,7 @@ select:focus {
 	height: 36px;
 	line-height: 36px;
 	font-weight: 600;
+	color: var(--text);
 }
 
 .goal-time-chip:hover {
@@ -1103,7 +990,7 @@ select:focus {
 
 .goal-time-chip--active {
 	border-color: color-mix(in srgb, var(--primary) 50%, var(--border));
-	background: color-mix(in srgb, var(--primary) 10%, transparent);
+	background: var(--panel-hover);
 }
 
 .goal-time-picker {
@@ -1112,27 +999,21 @@ select:focus {
 	padding: 8px;
 	border: 1px solid var(--border);
 	border-radius: 12px;
-	background: color-mix(in srgb, var(--surface) 96%, var(--muted) 4%);
+	background: var(--panel-subtle);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
 }
 .goal-time-wheel-pop {
 	position: absolute;
 	z-index: 90;
 	pointer-events: auto;
 	border-radius: 12px;
+	border: 1px solid var(--border);
+	background: var(--popover);
+	padding: 4px;
 	box-shadow:
 		0 10px 24px rgba(0, 0, 0, 0.28),
 		0 0 0 1px color-mix(in srgb, var(--primary) 20%, var(--border));
-}
-
-@keyframes morphIn {
-	from {
-		opacity: 0.2;
-		transform: scale(0.96);
-	}
-	to {
-		opacity: 1;
-		transform: scale(1);
-	}
 }
 
 @keyframes fadeUp {
@@ -1181,9 +1062,9 @@ select:focus {
 	font-size: 9px;
 	font-weight: 700;
 	letter-spacing: 0.04em;
-	background: rgba(255, 255, 255, 0.2);
-	color: rgba(255, 255, 255, 0.95);
-	border: 1px solid rgba(255, 255, 255, 0.35);
+	background: rgba(255, 255, 255, 0.14);
+	color: var(--event-text);
+	border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .event--compact .event-repeat-mark {
@@ -1203,19 +1084,23 @@ select:focus {
 	display: grid;
 	place-items: center;
 	padding: 16px;
-	background: rgba(0, 0, 0, 0.45);
-	backdrop-filter: blur(2px);
+	background: color-mix(in srgb, var(--background) 45%, transparent);
+	backdrop-filter: blur(16px);
 }
 
 .scope-modal {
+	position: relative;
+	overflow: hidden;
+	isolation: isolate;
+	will-change: backdrop-filter;
 	width: min(420px, calc(100vw - 24px));
 	border: 1px solid var(--border);
 	border-radius: 14px;
-	background: var(--surface);
+	background: var(--popover);
 	color: var(--text);
-	box-shadow:
-		0 18px 48px rgba(0, 0, 0, 0.35),
-		0 2px 10px rgba(0, 0, 0, 0.2);
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
+	box-shadow: 0 18px 44px color-mix(in srgb, var(--shadow) 88%, transparent);
 	padding: 14px;
 	display: grid;
 	gap: 12px;
@@ -1243,7 +1128,7 @@ select:focus {
 	height: 34px;
 	border-radius: 10px;
 	border: 1px solid var(--border);
-	background: color-mix(in srgb, var(--surface) 90%, var(--muted) 10%);
+	background: var(--panel-subtle);
 	color: var(--text);
 	font-size: 12px;
 	font-weight: 600;
@@ -1252,7 +1137,7 @@ select:focus {
 
 .scope-modal-btn:hover {
 	border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
-	background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+	background: var(--panel-hover);
 }
 
 .scope-modal-cancel {
@@ -1267,7 +1152,7 @@ select:focus {
 
 .scope-modal-cancel:hover {
 	color: var(--text);
-	background: color-mix(in srgb, var(--muted) 70%, transparent);
+	background: var(--panel-subtle);
 }
 
 @keyframes scopeModalIn {
@@ -1293,7 +1178,7 @@ select:focus {
 	padding: 0 8px;
 	border-radius: 999px;
 	border: 1px solid var(--border);
-	background: var(--surface);
+	background: var(--panel-subtle);
 	color: var(--text);
 	font-size: 11px;
 	font-weight: 600;
@@ -1322,7 +1207,7 @@ select:focus {
 	padding: 6px 8px;
 	border-radius: 8px;
 	border: 1px solid var(--border);
-	background: var(--surface);
+	background: var(--popover);
 	color: var(--text);
 	font-size: 11px;
 	line-height: 1.25;
@@ -1346,7 +1231,7 @@ select:focus {
 	inset: 3px;
 	border-radius: 8px;
 	pointer-events: none;
-	background: color-mix(in srgb, var(--primary) 12%, var(--background));
+	background: color-mix(in srgb, var(--primary) 8%, transparent);
 	box-shadow: inset 0 0 0 1px
 		color-mix(in srgb, var(--primary) 45%, transparent);
 	opacity: 0.8;

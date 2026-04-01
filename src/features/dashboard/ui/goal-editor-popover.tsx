@@ -3,6 +3,7 @@ import { RecurrenceType, SelectedSlot } from "@/features/goals/model/types";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useDashboard } from "../model";
 import { useOutsideClick } from "@/features/goals/hooks/useOutsideClick";
+import { createPortal } from "react-dom";
 import {
 	addMinutesToTime,
 	isQuarterHour,
@@ -193,22 +194,20 @@ export default function GoalEditorPopover({
 		const panelWidth = 320;
 		const panelHeight = popoverRef.current.offsetHeight;
 
-		const scrollX = window.scrollX;
-		const scrollY = window.scrollY;
 		const viewportWidth = window.innerWidth;
 		const viewportHeight = window.innerHeight;
 
-		const rightCandidate = panelAnchor.right + 12 + scrollX;
-		const leftCandidate = panelAnchor.left - panelWidth - 12 + scrollX;
+		const rightCandidate = panelAnchor.right + 12;
+		const leftCandidate = panelAnchor.left - panelWidth - 12;
 
 		const left =
-			rightCandidate + panelWidth <= viewportWidth + scrollX
+			rightCandidate + panelWidth <= viewportWidth
 				? rightCandidate
-				: Math.max(16 + scrollX, leftCandidate);
+				: Math.max(16, leftCandidate);
 
-		const rawTop = panelAnchor.top + scrollY;
-		const minTop = 16 + scrollY;
-		const maxTop = viewportHeight + scrollY - panelHeight - 16;
+		const rawTop = panelAnchor.top;
+		const minTop = 16;
+		const maxTop = viewportHeight - panelHeight - 16;
 		const top = Math.min(Math.max(rawTop, minTop), maxTop);
 
 		setPos({ top, left });
@@ -338,11 +337,14 @@ export default function GoalEditorPopover({
 	]);
 	useOutsideClick(timePanelRef, handleTimePanelOutside, timePanelOpen);
 
-	return (
+	if (typeof document === "undefined") return null;
+
+	return createPortal(
 		<div
 			ref={popoverRef}
 			className="goal-popover"
 			style={{
+				position: "fixed",
 				top: pos.top,
 				left: pos.left,
 				visibility: isPositioned ? "visible" : "hidden",
@@ -417,6 +419,7 @@ export default function GoalEditorPopover({
 				onSavePanel={() => setTimePanelOpen(false)}
 			/>
 			{error && <p className="mt-2 text-sm text-destructive">{error}</p>}
-		</div>
+		</div>,
+		document.body,
 	);
 }

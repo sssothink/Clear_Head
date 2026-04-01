@@ -72,7 +72,7 @@ export default function WeekGrid() {
 
 	return (
 		<div ref={gridRef} className="flex-1">
-			<div className="relative bg-background">
+			<div className="relative bg-transparent">
 				<div className="grid grid-cols-7" style={{ gridTemplateRows }}>
 					{hours.map((_, hourIndex) =>
 						days.map((_, dayIndex) => (
@@ -94,7 +94,7 @@ export default function WeekGrid() {
 
 				<div
 					style={{ top: `${currentTimeTop}px` }}
-					className="absolute -left-10 transform -translate-y-1/2 bg-primary text-black text-[11px] px-2 py-0.5 rounded-full z-10 pointer-events-none shadow"
+					className="pointer-events-none absolute -left-10 z-10 -translate-y-1/2 rounded-full border border-border bg-primary px-2 py-0.5 text-[11px] font-medium text-primary-foreground shadow-sm"
 				>
 					{`${String(currentHour).padStart(2, "0")}:${String(currentMinute).padStart(2, "0")}`}
 				</div>
@@ -130,7 +130,7 @@ export default function WeekGrid() {
 
 				<div
 					style={{ top: `${currentTimeTop}px` }}
-					className="absolute left-0 right-0 h-0.5 bg-primary/70 z-10 pointer-events-none"
+					className="pointer-events-none absolute left-0 right-0 z-10 h-px bg-[var(--event-border)]"
 				></div>
 
 				<WeekEventsOverlay />

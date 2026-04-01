@@ -24,11 +24,15 @@ function DashboardContent() {
 	const isRecurring = editingEvent?.recurrence_type !== "none";
 
 	return (
-		<div className="min-h-screen bg-background text-foreground">
-			<WeekDaysHeader />
-			<div className="flex border border-border bg-card shadow-sm overflow-hidden">
-				<TimeGutter />
-				<WeekGrid />
+		<div className="min-h-screen bg-background px-4 py-5 text-foreground sm:px-6 sm:py-6">
+			<div className="w-full">
+				<WeekDaysHeader />
+				<div className="overflow-visible rounded-3xl border border-border bg-card shadow-[0_18px_48px_rgba(0,0,0,0.24)]">
+					<div className="flex min-h-[calc(100vh-9rem)]">
+						<TimeGutter />
+						<WeekGrid />
+					</div>
+				</div>
 			</div>
 
 			{(selectedSlot || editingEvent) && (

@@ -6,14 +6,14 @@ export default function TimeGutter() {
 	const { hourHeight, isCollapsed } = useDashboard();
 
 	return (
-		<div className="w-12 border-r border-border bg-background/70">
+		<div className="w-12 border-r border-border bg-[var(--panel-subtle)]">
 			{hours.map((hour, i) => {
 				const h = hourToVisualHeight(i, hourHeight, isCollapsed);
 				return (
 					<div
 						key={hour}
 						style={{ height: h }}
-						className="flex items-start justify-end pr-2 text-[11px] text-muted-foreground border-b border-border"
+						className="flex items-start justify-end border-b border-border pr-2 text-[11px] text-muted-foreground"
 					>
 						{hour}
 					</div>
