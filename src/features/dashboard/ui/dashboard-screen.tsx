@@ -8,6 +8,7 @@ import { Goal, GoalOccurrence } from "@/features/goals/model/types";
 import { DashboardProvider, useDashboard } from "../model";
 import { addDays } from "date-fns";
 import { formatISODate } from "@/shared/lib/date";
+import WeekSwitcher from "./week-switcher";
 
 function DashboardContent() {
 	const {
@@ -26,7 +27,13 @@ function DashboardContent() {
 	return (
 		<div className="min-h-screen bg-background px-4 py-5 text-foreground sm:px-6 sm:py-6">
 			<div className="w-full">
-				<WeekDaysHeader />
+				<div className="sticky top-3 z-100 mb-3">
+					<WeekDaysHeader />
+					<div className="flex items-center justify-end">
+						<WeekSwitcher weekStart={weekStart} />
+					</div>
+				</div>
+
 				<div className="overflow-visible rounded-3xl border border-border bg-card shadow-[0_18px_48px_rgba(0,0,0,0.24)]">
 					<div className="flex min-h-[calc(100vh-9rem)]">
 						<TimeGutter />

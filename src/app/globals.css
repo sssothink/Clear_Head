@@ -1244,3 +1244,66 @@ select:focus {
 	position: relative;
 	background: color-mix(in srgb, var(--primary) 14%, transparent);
 }
+
+.week-switcher {
+	position: absolute;
+	display: inline-flex;
+	align-items: center;
+	top: 5em;
+	gap: 6;
+	padding: 4px;
+	border: 1px solid var(--border);
+	border-radius: 12px;
+	background: var(--card);
+	box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
+}
+.week-switcher-button,
+.week-switcher-today {
+	height: 32px;
+	border: 1px solid transparent;
+	border-radius: 8px;
+	background: transparent;
+	color: var(--text);
+	font-size: 12px;
+	font-weight: 700;
+	cursor: pointer;
+	transition:
+		background-color 0.14s ease,
+		border-color 0.14s ease,
+		opacity 0.14s ease;
+}
+.week-switcher-button {
+	width: 32px;
+	display: inline-grid;
+	place-items: center;
+}
+
+.week-switcher-today {
+	padding: 0 10px;
+}
+
+.week-switcher-button:hover,
+.week-switcher-today:hover {
+	border-color: color-mix(in srgb, var(--primary) 38%, var(--border));
+	background: var(--panel-subtle);
+}
+
+.week-switcher-today:disabled {
+	opacity: 0.45;
+	cursor: default;
+}
+
+.week-switcher-today:disabled:hover {
+	border-color: transparent;
+	background: transparent;
+}
+
+.week-switcher-range {
+	min-width: 112px;
+	padding: 0 8px;
+	color: var(--text);
+	font-size: 13px;
+	font-weight: 800;
+	text-align: center;
+	white-space: nowrap;
+}
