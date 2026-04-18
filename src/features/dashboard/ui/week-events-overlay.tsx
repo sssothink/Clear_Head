@@ -5,7 +5,7 @@ import { useDashboard } from "../model";
 import { useEffect, useRef, useState } from "react";
 import { toHHMM } from "@/lib/utils";
 import { getWeekEventLayouts, yToMinute } from "@/shared/lib/layout";
-import { RepeatIcon } from "lucide-react";
+import { RepeatIcon, Trash2Icon } from "lucide-react";
 import {
 	fromRangeMinutes,
 	resizeTaskRange,
@@ -25,8 +25,11 @@ export default function WeekEventsOverlay() {
 		hourHeight,
 		isCollapsed,
 		onEventResize,
+		onDelete,
+		onDeleteOccurrence,
 	} = useDashboard();
 	const [draggedEventId, setDraggedEventId] = useState<string | null>(null);
+	const [isTrashOver, setIsTrashOver] = useState(false);
 	const isResizingRef = useRef(false);
 	const [resizePreview, setResizePreview] = useState<
 		Record<string, { start_time: string; end_time: string }>
@@ -117,6 +120,45 @@ export default function WeekEventsOverlay() {
 
 	const handleDragEnd = () => {
 		setDraggedEventId(null);
+		setIsTrashOver(false);
+	};
+
+	const handleTrashDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+		event.preventDefault();
+		event.stopPropagation();
+		event.dataTransfer.dropEffect = "move";
+		setIsTrashOver(true);
+	};
+
+	const handleTrashDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+		if (event.currentTarget.contains(event.relatedTarget as Node | null)) {
+			return;
+		}
+
+		setIsTrashOver(false);
+	};
+
+	const handleTrashDrop = (event: React.DragEvent<HTMLDivElement>) => {
+		event.preventDefault();
+		event.stopPropagation();
+
+		const eventId = event.dataTransfer.getData("eventId") || draggedEventId;
+		const eventItem = events.find((item) => item.id === eventId);
+
+		setDraggedEventId(null);
+		setIsTrashOver(false);
+
+		if (!eventItem) return;
+
+		onClose();
+		setPanelAnchor(null);
+
+		if (eventItem.recurrence_type && eventItem.recurrence_type !== "none") {
+			onDeleteOccurrence(eventItem.goal_id, eventItem.occurrence_date);
+			return;
+		}
+
+		onDelete(eventItem.goal_id);
 	};
 
 	useEffect(() => {
@@ -197,6 +239,23 @@ export default function WeekEventsOverlay() {
 
 	return (
 		<div ref={overlayRef} className="absolute inset-0 pointer-events-none">
+			{draggedEventId && (
+				<div
+					className={cn(
+						"drag-delete-target pointer-events-auto",
+						isTrashOver && "drag-delete-target--active",
+					)}
+					role="button"
+					aria-label="Drop task here to delete it"
+					onDragOver={handleTrashDragOver}
+					onDragEnter={handleTrashDragOver}
+					onDragLeave={handleTrashDragLeave}
+					onDrop={handleTrashDrop}
+				>
+					<Trash2Icon size={22} strokeWidth={2.2} />
+				</div>
+			)}
+
 			{displayEvents.map((event) => {
 				const layout = eventLayouts[event.id];
 
