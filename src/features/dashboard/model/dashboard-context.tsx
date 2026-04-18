@@ -46,6 +46,12 @@ export type DashboardContextType = {
 		newHourIndex: number,
 	) => void;
 
+	onEventResize: (
+		eventId: string,
+		nextStartTime: string,
+		nextEndTime: string,
+	) => void;
+
 	onClose: () => void;
 
 	onToggle: (id: string) => void;
@@ -127,20 +133,21 @@ export function DashboardProvider({
 
 	const isCollapsed = isCollapsedManual && !hasEarlyTasks;
 
-	const { onEdit, onSubmit, onEventDrop } = useDashboardInteractions({
-		events,
-		weekStart,
-		selectedSlot,
-		setSelectedSlot,
-		editingEvent,
-		setEditingEvent,
-		goalOperations: {
-			createGoal,
-			updateGoal,
-			detachOccurrence,
-			updateGoalFromDate,
-		},
-	});
+	const { onEdit, onSubmit, onEventDrop, onEventResize } =
+		useDashboardInteractions({
+			events,
+			weekStart,
+			selectedSlot,
+			setSelectedSlot,
+			editingEvent,
+			setEditingEvent,
+			goalOperations: {
+				createGoal,
+				updateGoal,
+				detachOccurrence,
+				updateGoalFromDate,
+			},
+		});
 
 	const value = useMemo<DashboardContextType>(
 		() => ({
@@ -156,6 +163,7 @@ export function DashboardProvider({
 			onSubmit,
 			onClose,
 			onEventDrop,
+			onEventResize,
 
 			onToggle: toggleComplete,
 			onDelete: deleteGoal,
@@ -181,6 +189,7 @@ export function DashboardProvider({
 			onSubmit,
 			onClose,
 			onEventDrop,
+			onEventResize,
 			toggleComplete,
 			deleteGoal,
 			deleteGoalOccurrence,

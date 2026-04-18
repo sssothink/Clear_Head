@@ -7,7 +7,6 @@ export type GoalStatus = (typeof GOAL_STATUSES)[number];
 export function isRecurrenceType(value: string): value is RecurrenceType {
 	return RECURRENCE_TYPES.includes(value as RecurrenceType);
 }
-
 export type GoalOccurrence = {
 	goal_id: string;
 	date: string;

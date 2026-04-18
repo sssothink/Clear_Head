@@ -204,9 +204,43 @@ export function useDashboardInteractions({
 		[detachOccurrence, events, updateGoal, weekStart],
 	);
 
+	const onEventResize = useCallback(
+		(eventId: string, nextStartTime: string, nextEndTime: string) => {
+			const event = events.find((item) => item.id === eventId);
+			if (!event) return;
+
+			if (event.start_time === nextStartTime && event.end_time === nextEndTime)
+				return;
+
+			const isRecurring = event.recurrence_type !== "none";
+
+			if (isRecurring) {
+				detachOccurrence({
+					event,
+					newDate: event.occurrence_date,
+					patch: {
+						title: event.title,
+						description: event.description,
+						start_time: nextStartTime,
+						end_time: nextEndTime,
+					},
+				});
+				return;
+			}
+
+			updateGoal(event.goal_id, {
+				start_time: nextStartTime,
+				end_time: nextEndTime,
+				title: event.title,
+			});
+		},
+		[detachOccurrence, events, updateGoal],
+	);
+
 	return {
 		onEdit,
 		onSubmit,
 		onEventDrop,
+		onEventResize,
 	};
 }

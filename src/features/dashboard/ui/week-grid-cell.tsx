@@ -84,7 +84,7 @@ export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 			ref={cellRef}
 			className={`border-r border-b border-border bg-transparent transition-colors hover:bg-[var(--panel-subtle)]
 				${isPreviewSelected ? "cell-preview-selected" : ""}
-				${isDragOver ? "bg-[var(--panel-hover)]" : ""}
+				${isDragOver ? "cell-drop-target" : ""}
 			`}
 			onClick={(e) => {
 				if (suppressNextOpenRef.current) {
