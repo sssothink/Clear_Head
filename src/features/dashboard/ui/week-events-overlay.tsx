@@ -4,7 +4,7 @@ import { cn } from "@/shared/lib/cn";
 import { useDashboard } from "../model";
 import { useEffect, useRef, useState } from "react";
 import { toHHMM } from "@/lib/utils";
-import { getEventLayout, yToMinute } from "@/shared/lib/layout";
+import { getWeekEventLayouts, yToMinute } from "@/shared/lib/layout";
 import { RepeatIcon } from "lucide-react";
 import {
 	fromRangeMinutes,
@@ -179,19 +179,34 @@ export default function WeekEventsOverlay() {
 		};
 	}, [activeResize, hourHeight, isCollapsed, resizePreview, onEventResize]);
 
+	const displayEvents = events.map((event) => {
+		const preview = resizePreview[event.id];
+
+		return {
+			...event,
+			start_time: preview?.start_time || event.start_time,
+			end_time: preview?.end_time || event.end_time,
+		};
+	});
+
+	const eventLayouts = getWeekEventLayouts(
+		displayEvents,
+		hourHeight,
+		isCollapsed,
+	);
+
 	return (
 		<div ref={overlayRef} className="absolute inset-0 pointer-events-none">
-			{events.map((event) => {
-				const preview = resizePreview[event.id];
-				const displayStartTime = preview?.start_time || event.start_time;
-				const displayEndTime = preview?.end_time || event.end_time;
+			{displayEvents.map((event) => {
+				const layout = eventLayouts[event.id];
 
-				const { top, height } = getEventLayout(
-					displayStartTime,
-					displayEndTime,
-					hourHeight,
-					isCollapsed,
-				);
+				if (!layout) {
+					return null;
+				}
+
+				const displayStartTime = event.start_time;
+				const displayEndTime = event.end_time;
+				const { top, height } = layout;
 
 				const isRecurring =
 					event.recurrence_type && event.recurrence_type !== "none";
@@ -200,8 +215,13 @@ export default function WeekEventsOverlay() {
 					event.recurrence_type === "weekly"
 						? "Repeats weekly"
 						: "Repeats daily";
-				const showMeta = height >= Math.max(34, hourHeight * 0.65);
-				const showStatus = height >= Math.max(52, hourHeight * 1.0);
+
+				const isNarrowOverlap = layout.overlapColumnCount >= 3;
+				const showMeta =
+					!isNarrowOverlap && height >= Math.max(34, hourHeight * 0.65);
+
+				const showStatus =
+					!isNarrowOverlap && height >= Math.max(52, hourHeight * 1.0);
 				const isCompact = height < Math.max(24, hourHeight * 0.42);
 
 				return (
@@ -228,14 +248,16 @@ export default function WeekEventsOverlay() {
 						className={cn(
 							"event absolute pointer-events-auto justify-between p-3 transition-all duration-150",
 							isCompact && "event--compact",
+							isNarrowOverlap && "event--narrow-overlap",
 							event.status === "completed" && "event--completed",
+							layout.hasOverlap && "event--overlap",
 							draggedEventId === event.id && "opacity-40 scale-90",
 						)}
 						style={{
 							top,
 							height,
-							left: `${(100 / 7) * event.dayIndex}%`,
-							width: `${100 / 7}%`,
+							left: layout.left,
+							width: layout.width,
 						}}
 					>
 						<div

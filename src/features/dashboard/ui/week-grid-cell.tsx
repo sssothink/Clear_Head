@@ -9,8 +9,10 @@ type Props = {
 
 export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 	const [isDragOver, setIsDragOver] = useState(false);
+	const [isInvalidDrop, setIsInvalidDrop] = useState(false);
 	const {
 		onEventDrop,
+		canEventDrop,
 		setPanelAnchor,
 		selectedSlot,
 		editingEvent,
@@ -23,16 +25,23 @@ export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 
 	const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
+		const eventId = e.dataTransfer.getData("eventId");
+		const isAllowed = eventId ? canEventDrop(eventId, dayIndex, hourIndex) : true;
+
+		e.dataTransfer.dropEffect = isAllowed ? "move" : "none";
 		setIsDragOver(true);
+		setIsInvalidDrop(!isAllowed);
 	};
 
 	const handleDragLeave = () => {
 		setIsDragOver(false);
+		setIsInvalidDrop(false);
 	};
 
 	const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
 		setIsDragOver(false);
+		setIsInvalidDrop(false);
 
 		const eventId = e.dataTransfer.getData("eventId");
 		if (eventId) {
@@ -84,7 +93,7 @@ export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 			ref={cellRef}
 			className={`border-r border-b border-border bg-transparent transition-colors hover:bg-[var(--panel-subtle)]
 				${isPreviewSelected ? "cell-preview-selected" : ""}
-				${isDragOver ? "cell-drop-target" : ""}
+				${isDragOver ? (isInvalidDrop ? "cell-drop-target-invalid" : "cell-drop-target") : ""}
 			`}
 			onClick={(e) => {
 				if (suppressNextOpenRef.current) {

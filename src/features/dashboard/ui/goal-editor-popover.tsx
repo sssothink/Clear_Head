@@ -18,6 +18,7 @@ import {
 	GoalTimePanel,
 } from "./goal-editor";
 import GoalScopeConfirm from "./goal-editor/goal-editor-scope-confirm";
+import type { SubmitResult } from "../model/use-dashboard-interactions";
 
 function clamp(value: number, min: number, max: number) {
 	if (max < min) return min;
@@ -51,7 +52,7 @@ type GoalModalProps = {
 		recurrence_type: RecurrenceType;
 		recurrence_days?: number[];
 		edit_scope?: "single" | "future";
-	}) => void;
+	}) => SubmitResult;
 	onDelete?: () => void;
 	onDeleteOnly?: () => void;
 	onDeleteAll?: () => void;
@@ -146,7 +147,8 @@ export default function GoalEditorPopover({
 				if (!initialData) return false;
 				return (
 					normalizeText(title) !== normalizeText(initialData.title) ||
-					normalizeText(description) !== normalizeText(initialData.description) ||
+					normalizeText(description) !==
+						normalizeText(initialData.description) ||
 					date !== initialData.date ||
 					startTime !== initialData.start_time ||
 					endTime !== initialData.end_time ||
@@ -317,7 +319,7 @@ export default function GoalEditorPopover({
 			return;
 		}
 
-		onSubmit({
+		const result = onSubmit({
 			title,
 			description,
 			start_time: startTime,
@@ -327,6 +329,11 @@ export default function GoalEditorPopover({
 			recurrence_days: recurrence === "weekly" ? recurrenceDays : undefined,
 			edit_scope: scope,
 		});
+
+		if (!result.ok) {
+			setError(result.message);
+			return;
+		}
 
 		onClose();
 	};

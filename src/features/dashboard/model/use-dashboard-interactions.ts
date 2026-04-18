@@ -10,6 +10,7 @@ import {
 	SelectedSlot,
 } from "@/features/goals/model/types";
 import type { useOptimisticGoals } from "@/features/goals/hooks/useOptimisticGoals";
+import { exceedsMaxConcurrentEvents } from "./event-conflicts";
 
 type SubmitPayload = {
 	title: string;
@@ -21,6 +22,10 @@ type SubmitPayload = {
 	recurrence_days?: number[];
 	edit_scope?: "single" | "future";
 };
+
+export type SubmitResult = { ok: true } | { ok: false; message: string };
+
+const MAX_CONCURRENT_MESSAGE = "You can place up to 3 tasks at the same time.";
 
 type GoalOperations = Pick<
 	ReturnType<typeof useOptimisticGoals>,
@@ -35,6 +40,7 @@ type UseDashboardInteractionsParams = {
 	editingEvent: DayEvent | null;
 	setEditingEvent: React.Dispatch<React.SetStateAction<DayEvent | null>>;
 	goalOperations: GoalOperations;
+	onScheduleNotice: (message: string) => void;
 };
 
 function buildMovedTimeRange(
@@ -61,6 +67,60 @@ function getDateByDayIndex(weekStartDate: string, dayIndex: number) {
 	return formatISODate(addDays(new Date(weekStartDate), dayIndex));
 }
 
+function getNormalizedWeekday(date: Date) {
+	const day = date.getDay();
+	return day === 0 ? 7 : day;
+}
+
+function buildSubmitCandidates(
+	data: SubmitPayload,
+	weekStart: string,
+	baseEvent?: DayEvent,
+) {
+	const weekStartDate = new Date(weekStart);
+	const candidates: Array<
+		Pick<DayEvent, "id" | "dayIndex" | "start_time" | "end_time">
+	> = [];
+
+	for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+		const currentDate = addDays(weekStartDate, dayIndex);
+		const currentDateIso = formatISODate(currentDate);
+
+		if (currentDateIso < data.date) {
+			continue;
+		}
+
+		if (
+			(data.recurrence_type === "none" || data.edit_scope === "single") &&
+			currentDateIso !== data.date
+		) {
+			continue;
+		}
+
+		if (
+			data.recurrence_type === "weekly" &&
+			!data.recurrence_days?.includes(getNormalizedWeekday(currentDate))
+		) {
+			continue;
+		}
+
+		const id = baseEvent
+			? data.recurrence_type === "none" || data.edit_scope === "single"
+				? baseEvent.id
+				: `${baseEvent.goal_id}_${currentDateIso}`
+			: `new-${currentDateIso}`;
+
+		candidates.push({
+			id,
+			dayIndex,
+			start_time: data.start_time,
+			end_time: data.end_time,
+		});
+	}
+
+	return candidates;
+}
+
 export function useDashboardInteractions({
 	events,
 	weekStart,
@@ -69,6 +129,7 @@ export function useDashboardInteractions({
 	editingEvent,
 	setEditingEvent,
 	goalOperations,
+	onScheduleNotice,
 }: UseDashboardInteractionsParams) {
 	const { createGoal, updateGoal, detachOccurrence, updateGoalFromDate } =
 		goalOperations;
@@ -85,7 +146,24 @@ export function useDashboardInteractions({
 	);
 
 	const onSubmit = useCallback(
-		(data: SubmitPayload) => {
+		(data: SubmitPayload): SubmitResult => {
+			const candidates = buildSubmitCandidates(
+				data,
+				weekStart,
+				editingEvent ?? undefined,
+			);
+
+			const hasConflict = candidates.some((candidate) =>
+				exceedsMaxConcurrentEvents(events, candidate),
+			);
+
+			if (hasConflict) {
+				return {
+					ok: false,
+					message: MAX_CONCURRENT_MESSAGE,
+				};
+			}
+
 			if (editingEvent) {
 				const isRecurring = editingEvent.recurrence_type !== "none";
 
@@ -105,7 +183,7 @@ export function useDashboardInteractions({
 						...(isInCurrentWeek ? { dayIndex: nextDayIndex } : {}),
 					});
 					setEditingEvent(null);
-					return;
+					return { ok: true };
 				}
 
 				if (data.edit_scope === "future") {
@@ -137,10 +215,12 @@ export function useDashboardInteractions({
 				}
 
 				setEditingEvent(null);
-				return;
+				return { ok: true };
 			}
 
-			if (!selectedSlot) return;
+			if (!selectedSlot) {
+				return { ok: false, message: "Select a time slot first." };
+			}
 			createGoal({
 				title: data.title,
 				description: data.description,
@@ -151,11 +231,13 @@ export function useDashboardInteractions({
 				recurrence_days: data.recurrence_days,
 			});
 			setSelectedSlot(null);
+			return { ok: true };
 		},
 		[
 			createGoal,
 			detachOccurrence,
 			editingEvent,
+			events,
 			selectedSlot,
 			setEditingEvent,
 			setSelectedSlot,
@@ -163,6 +245,29 @@ export function useDashboardInteractions({
 			updateGoalFromDate,
 			weekStart,
 		],
+	);
+
+	const canEventDrop = useCallback(
+		(eventId: string, newDayIndex: number, newHourIndex: number) => {
+			const event = events.find((item) => item.id === eventId);
+			if (!event) return false;
+
+			const { newStartTime, newEndTime } = buildMovedTimeRange(
+				event.start_time,
+				event.end_time,
+				newHourIndex,
+			);
+
+			const candidateEvent = {
+				...event,
+				dayIndex: newDayIndex,
+				start_time: newStartTime,
+				end_time: newEndTime,
+			};
+
+			return !exceedsMaxConcurrentEvents(events, candidateEvent);
+		},
+		[events],
 	);
 
 	const onEventDrop = useCallback(
@@ -175,6 +280,12 @@ export function useDashboardInteractions({
 				event.end_time,
 				newHourIndex,
 			);
+
+			if (!canEventDrop(eventId, newDayIndex, newHourIndex)) {
+				onScheduleNotice(MAX_CONCURRENT_MESSAGE);
+				return;
+			}
+
 			const newDate = getDateByDayIndex(weekStart, newDayIndex);
 			const isRecurring = event.recurrence_type !== "none";
 
@@ -201,7 +312,14 @@ export function useDashboardInteractions({
 				title: event.title,
 			});
 		},
-		[detachOccurrence, events, updateGoal, weekStart],
+		[
+			canEventDrop,
+			detachOccurrence,
+			events,
+			onScheduleNotice,
+			updateGoal,
+			weekStart,
+		],
 	);
 
 	const onEventResize = useCallback(
@@ -211,6 +329,17 @@ export function useDashboardInteractions({
 
 			if (event.start_time === nextStartTime && event.end_time === nextEndTime)
 				return;
+
+			const candidateEvent = {
+				...event,
+				start_time: nextStartTime,
+				end_time: nextEndTime,
+			};
+
+			if (exceedsMaxConcurrentEvents(events, candidateEvent)) {
+				onScheduleNotice(MAX_CONCURRENT_MESSAGE);
+				return;
+			}
 
 			const isRecurring = event.recurrence_type !== "none";
 
@@ -234,10 +363,11 @@ export function useDashboardInteractions({
 				title: event.title,
 			});
 		},
-		[detachOccurrence, events, updateGoal],
+		[detachOccurrence, events, onScheduleNotice, updateGoal],
 	);
 
 	return {
+		canEventDrop,
 		onEdit,
 		onSubmit,
 		onEventDrop,

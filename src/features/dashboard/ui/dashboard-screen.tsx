@@ -20,6 +20,7 @@ function DashboardContent() {
 		onDelete,
 		onDeleteOccurrence,
 		panelAnchor,
+		scheduleNotice,
 	} = useDashboard();
 
 	const isRecurring = editingEvent?.recurrence_type !== "none";
@@ -27,11 +28,12 @@ function DashboardContent() {
 	return (
 		<div className="min-h-screen bg-background px-4 py-5 text-foreground sm:px-6 sm:py-6">
 			<div className="w-full">
-				<div className="sticky top-3 z-100 mb-3">
-					<WeekDaysHeader />
-					<div className="flex items-center justify-end">
+				<div className="sticky top-3 z-100 mb-3 bg-background pb-1">
+					<div className="mb-3 flex items-center justify-end">
 						<WeekSwitcher weekStart={weekStart} />
 					</div>
+
+					<WeekDaysHeader />
 				</div>
 
 				<div className="overflow-visible rounded-3xl border border-border bg-card shadow-[0_18px_48px_rgba(0,0,0,0.24)]">
@@ -41,6 +43,17 @@ function DashboardContent() {
 					</div>
 				</div>
 			</div>
+
+			{scheduleNotice && (
+				<div
+					className={`schedule-notice ${
+						scheduleNotice.visible ? "schedule-notice--visible" : ""
+					}`}
+					role="status"
+				>
+					{scheduleNotice.message}
+				</div>
+			)}
 
 			{(selectedSlot || editingEvent) && (
 				<GoalEditorPopover

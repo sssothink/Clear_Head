@@ -6,6 +6,8 @@ import React, {
 	useMemo,
 	useState,
 	useEffect,
+	useCallback,
+	useRef,
 } from "react";
 import {
 	DayEvent,
@@ -18,6 +20,12 @@ import { useOptimisticGoals } from "../../goals/hooks/useOptimisticGoals";
 import { buildWeekEvents } from "@/lib/week/build-week-events";
 import { useDashboardUIState } from "./use-dashboard-ui-state";
 import { useDashboardInteractions } from "./use-dashboard-interactions";
+import type { SubmitResult } from "./use-dashboard-interactions";
+
+type ScheduleNotice = {
+	message: string;
+	visible: boolean;
+};
 
 export type DashboardContextType = {
 	events: DayEvent[];
@@ -26,6 +34,9 @@ export type DashboardContextType = {
 
 	selectedSlot: SelectedSlot | null;
 	editingEvent: DayEvent | null;
+
+	scheduleNotice: ScheduleNotice | null;
+	clearScheduleNotice: () => void;
 
 	onCellClick: (slot: SelectedSlot | null) => void;
 	onEdit: (id: string) => void;
@@ -38,13 +49,18 @@ export type DashboardContextType = {
 		recurrence_type: RecurrenceType;
 		recurrence_days?: number[];
 		edit_scope?: "single" | "future";
-	}) => void;
+	}) => SubmitResult;
 
 	onEventDrop: (
 		eventId: string,
 		newDayIndex: number,
 		newHourIndex: number,
 	) => void;
+	canEventDrop: (
+		eventId: string,
+		newDayIndex: number,
+		newHourIndex: number,
+	) => boolean;
 
 	onEventResize: (
 		eventId: string,
@@ -95,6 +111,64 @@ export function DashboardProvider({
 		window.localStorage.setItem("calendar-hour-height", String(hourHeight));
 	}, [hourHeight]);
 
+	const [scheduleNotice, setScheduleNotice] = useState<ScheduleNotice | null>(
+		null,
+	);
+	const scheduleNoticeHideTimeoutRef =
+		useRef<ReturnType<typeof setTimeout> | null>(null);
+	const scheduleNoticeClearTimeoutRef =
+		useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	const clearScheduleNotice = useCallback(() => {
+		if (scheduleNoticeHideTimeoutRef.current) {
+			clearTimeout(scheduleNoticeHideTimeoutRef.current);
+			scheduleNoticeHideTimeoutRef.current = null;
+		}
+
+		if (scheduleNoticeClearTimeoutRef.current) {
+			clearTimeout(scheduleNoticeClearTimeoutRef.current);
+			scheduleNoticeClearTimeoutRef.current = null;
+		}
+
+		setScheduleNotice(null);
+	}, []);
+
+	const showScheduleNotice = useCallback((message: string) => {
+		if (scheduleNoticeHideTimeoutRef.current) {
+			clearTimeout(scheduleNoticeHideTimeoutRef.current);
+		}
+
+		if (scheduleNoticeClearTimeoutRef.current) {
+			clearTimeout(scheduleNoticeClearTimeoutRef.current);
+		}
+
+		setScheduleNotice({ message, visible: true });
+
+		scheduleNoticeHideTimeoutRef.current = setTimeout(() => {
+			setScheduleNotice((current) =>
+				current ? { ...current, visible: false } : current,
+			);
+			scheduleNoticeHideTimeoutRef.current = null;
+		}, 2400);
+
+		scheduleNoticeClearTimeoutRef.current = setTimeout(() => {
+			setScheduleNotice(null);
+			scheduleNoticeClearTimeoutRef.current = null;
+		}, 2800);
+	}, []);
+
+	useEffect(() => {
+		return () => {
+			if (scheduleNoticeHideTimeoutRef.current) {
+				clearTimeout(scheduleNoticeHideTimeoutRef.current);
+			}
+
+			if (scheduleNoticeClearTimeoutRef.current) {
+				clearTimeout(scheduleNoticeClearTimeoutRef.current);
+			}
+		};
+	}, []);
+
 	const {
 		selectedSlot,
 		setSelectedSlot,
@@ -133,7 +207,7 @@ export function DashboardProvider({
 
 	const isCollapsed = isCollapsedManual && !hasEarlyTasks;
 
-	const { onEdit, onSubmit, onEventDrop, onEventResize } =
+	const { canEventDrop, onEdit, onSubmit, onEventDrop, onEventResize } =
 		useDashboardInteractions({
 			events,
 			weekStart,
@@ -141,6 +215,7 @@ export function DashboardProvider({
 			setSelectedSlot,
 			editingEvent,
 			setEditingEvent,
+			onScheduleNotice: showScheduleNotice,
 			goalOperations: {
 				createGoal,
 				updateGoal,
@@ -158,11 +233,15 @@ export function DashboardProvider({
 			selectedSlot,
 			editingEvent,
 
+			scheduleNotice,
+			clearScheduleNotice,
+
 			onCellClick,
 			onEdit,
 			onSubmit,
 			onClose,
 			onEventDrop,
+			canEventDrop,
 			onEventResize,
 
 			onToggle: toggleComplete,
@@ -189,6 +268,7 @@ export function DashboardProvider({
 			onSubmit,
 			onClose,
 			onEventDrop,
+			canEventDrop,
 			onEventResize,
 			toggleComplete,
 			deleteGoal,
@@ -200,6 +280,8 @@ export function DashboardProvider({
 			setIsCollapsedManual,
 			hasEarlyTasks,
 			hourHeight,
+			scheduleNotice,
+			clearScheduleNotice,
 		],
 	);
 

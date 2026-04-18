@@ -30,7 +30,7 @@ export default function WeekSwitcher({ weekStart }: { weekStart: string }) {
 		router.prefetch(previousWeekUrl);
 		router.prefetch(nextWeekUrl);
 		router.prefetch(todayWeekUrl);
-	}, [router, previousWeekUrl, nextWeekUrl, todayWeekStart]);
+	}, [router, previousWeekUrl, nextWeekUrl, todayWeekUrl]);
 
 	return (
 		<div className="week-switcher" aria-label="Week navigation">

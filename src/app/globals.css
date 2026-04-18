@@ -1245,12 +1245,29 @@ select:focus {
 	background: color-mix(in srgb, var(--primary) 14%, transparent);
 }
 
+.cell-drop-target-invalid {
+	position: relative;
+	background: color-mix(in srgb, var(--destructive) 16%, transparent);
+}
+
+.cell-drop-target-invalid::after {
+	content: "";
+	position: absolute;
+	inset: 2px;
+	border-radius: 8px;
+	pointer-events: none;
+	background: color-mix(in srgb, var(--destructive) 10%, transparent);
+	box-shadow:
+		inset 0 0 0 1px color-mix(in srgb, var(--destructive) 72%, transparent),
+		0 10px 26px color-mix(in srgb, var(--destructive) 18%, transparent);
+}
+
 .week-switcher {
 	position: absolute;
 	display: inline-flex;
 	align-items: center;
 	top: 5em;
-	gap: 6;
+	gap: 6px;
 	padding: 4px;
 	border: 1px solid var(--border);
 	border-radius: 12px;
@@ -1306,4 +1323,68 @@ select:focus {
 	font-weight: 800;
 	text-align: center;
 	white-space: nowrap;
+}
+
+.event--overlap {
+	border-color: color-mix(in srgb, var(--event-border) 80%, var(--primary));
+}
+
+.event--narrow-overlap {
+	padding: 6px;
+	gap: 4px;
+}
+
+.event--narrow-overlap .event-header {
+	gap: 4px;
+	align-items: flex-start;
+}
+
+.event--narrow-overlap .event-checkbox {
+	width: 12px;
+	height: 12px;
+	margin-top: 2px;
+}
+
+.event--narrow-overlap .event-title {
+	font-size: 11px;
+	line-height: 1.15;
+	font-weight: 700;
+	display: -webkit-box;
+	white-space: wrap;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.event--narrow-overlap .event-repeat-mark {
+	display: none;
+}
+
+.schedule-notice {
+	position: fixed;
+	top: 10%;
+	left: 50%;
+	z-index: 300;
+	max-width: min(420px, calc(100vw - 32px));
+	transform: translate(-50%, -50%) scale(0.96);
+	border: 1px solid color-mix(in srgb, var(--destructive) 42%, var(--border));
+	border-radius: 12px;
+	background: color-mix(in srgb, var(--destructive) 16%, var(--popover));
+	color: var(--text);
+	padding: 12px 16px;
+	font-size: 13px;
+	font-weight: 700;
+	line-height: 1.35;
+	text-align: center;
+	box-shadow: 0 18px 44px rgba(0, 0, 0, 0.32);
+	opacity: 0;
+	pointer-events: none;
+	transition:
+		opacity 0.22s ease,
+		transform 0.22s ease;
+}
+
+.schedule-notice--visible {
+	opacity: 1;
+	transform: translate(-50%, -50%) scale(1);
 }
