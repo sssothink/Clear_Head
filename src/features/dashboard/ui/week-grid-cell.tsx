@@ -13,6 +13,7 @@ export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 	const {
 		onEventDrop,
 		canEventDrop,
+		finishEventDrag,
 		setPanelAnchor,
 		selectedSlot,
 		editingEvent,
@@ -47,6 +48,7 @@ export default function WeekGridCell({ onClick, dayIndex, hourIndex }: Props) {
 		if (eventId) {
 			onEventDrop(eventId, dayIndex, hourIndex);
 		}
+		finishEventDrag();
 	};
 	const cellRef = useRef<HTMLDivElement | null>(null);
 	const isPreviewSelected =

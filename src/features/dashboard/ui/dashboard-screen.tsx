@@ -10,7 +10,7 @@ import { addDays } from "date-fns";
 import { formatISODate } from "@/shared/lib/date";
 import WeekSwitcher from "./week-switcher";
 
-function DashboardContent() {
+export function DashboardContent() {
 	const {
 		weekStart,
 		selectedSlot,

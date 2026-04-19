@@ -32,7 +32,16 @@ const LoginPage = () => {
 			<div className="auth-card container">
 				<div className="auth-head">
 					<h1>Log in</h1>
-					<p>Log in to continue using Clear Head</p>
+					<p>
+						Log in or{" "}
+						<button
+							className="underline"
+							onClick={() => router.push("/auth/register")}
+						>
+							register
+						</button>{" "}
+						to continue using Clear Head
+					</p>
 				</div>
 
 				<form className="auth-form" onSubmit={handleLogin}>

@@ -1,59 +1,103 @@
-export default function HomePage() {
-	return (
-		<main>
-			<section className="section">
-				<div className="container">
-					<div className="card p-8">
-						<div className="badge">Focus & Flow</div>
-						<h2 className="mt-3 text-3xl font-semibold tracking-tight">
-							Сосредоточься на важном
-						</h2>
-						<p
-							className="mt-2 text-base"
-							style={{ color: "var(--muted-foreground)" }}
-						>
-							Планируй задачи, отслеживай прогресс и освобождай голову от
-							лишнего.
-						</p>
+import Link from "next/link";
+import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 
-						<div className="mt-6 flex gap-3">
-							<button className="rounded-lg bg-primary px-4 py-2 text-primary-foreground text-sm">
-								Начать
-							</button>
-							<button className="rounded-lg border px-4 py-2 text-sm">
-								Посмотреть демо
-							</button>
+async function getLandingUser() {
+	try {
+		const supabase = await createSupabaseServerClient();
+		const { data } = await supabase.auth.getUser();
+		return data.user;
+	} catch {
+		return null;
+	}
+}
+
+export default async function HomePage() {
+	const user = await getLandingUser();
+	const isLoggedIn = Boolean(user);
+
+	return (
+		<main className="landing-shell">
+			<section className="landing-hero">
+				<div className="container">
+					<div className="landing-hero-inner">
+						<div className="landing-copy">
+							<div className="landing-badge">Focus & Flow</div>
+							<h1>Clear Head</h1>
+							<p className="landing-lead">
+								A weekly planner for tasks that need time, attention, and a
+								clear place in your day.
+							</p>
+							<p className="landing-subcopy">
+								Create tasks, resize time blocks, drag plans between days, handle
+								recurring routines, and keep overlapping work readable with smart
+								calendar columns.
+							</p>
+
+							<div className="landing-actions">
+								<Link
+									className="landing-button landing-button-primary"
+									href={isLoggedIn ? "/dashboard" : "/auth/register"}
+								>
+									{isLoggedIn ? "Open dashboard" : "Start"}
+								</Link>
+
+								{!isLoggedIn && (
+									<Link
+										className="landing-button landing-button-secondary"
+										href="/demo"
+									>
+										View demo
+									</Link>
+								)}
+							</div>
+						</div>
+
+						<div className="landing-preview" aria-hidden="true">
+							<div className="landing-preview-top">
+								<span>Mon</span>
+								<span>Tue</span>
+								<span>Wed</span>
+							</div>
+							<div className="landing-preview-grid">
+								<div className="landing-preview-task landing-preview-task-a">
+									Deep work
+								</div>
+								<div className="landing-preview-task landing-preview-task-b">
+									Design review
+								</div>
+								<div className="landing-preview-task landing-preview-task-c">
+									Daily review
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
 			</section>
-			<section className="section">
-				<div className="container grid gap-4 md:grid-cols-3">
-					<div className="fade-up card p-6">
-						<h3 className="text-lg font-semibold">Ясные приоритеты</h3>
-						<p
-							className="mt-2 text-sm"
-							style={{ color: "var(--muted-foreground)" }}
-						>
-							Фильтрация и статус‑метки для контроля нагрузки.
+
+			<section className="landing-section">
+				<div className="container landing-feature-grid">
+					<div className="landing-feature">
+						<h2>Full planner after registration</h2>
+						<p>
+							Your account unlocks persistent tasks, weekly navigation,
+							recurring schedules, completion state, editing, deletion, drag and
+							drop, resize, and all conflict protection.
 						</p>
 					</div>
-					<div className="fade-up card p-6">
-						<h3 className="text-lg font-semibold">Контроль времени</h3>
-						<p
-							className="mt-2 text-sm"
-							style={{ color: "var(--muted-foreground)" }}
-						>
-							Планируй прогресс и отслеживай время, чтобы получить больше.
+					<div className="landing-feature">
+						<h2>Built for speed</h2>
+						<p>
+							The registered dashboard uses optimistic updates, so creating,
+							moving, resizing, and deleting tasks feels instant while changes
+							sync safely in the background.
 						</p>
 					</div>
-					<div className="fade-up card p-6">
-						<h3 className="text-lg font-semibold">Отслеживание финансов</h3>
-						<p
-							className="mt-2 text-sm"
-							style={{ color: "var(--muted-foreground)" }}
-						>
-							Контролируй расходы и планируй важные покупки.
+					<div className="landing-feature">
+						<h2>Try before signing up</h2>
+						<p>
+							The demo lets guests explore the full interaction model in this
+							browser. Registration removes demo limits and saves your real
+							workspace.
 						</p>
 					</div>
 				</div>

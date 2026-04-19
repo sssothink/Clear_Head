@@ -26,13 +26,15 @@ const Header = () => {
 	}, []);
 
 	return (
-		<header className="border-b" style={{ borderColor: "var(--border)" }}>
-			<div className="container flex items-center justify-between py-4">
-				<h1 className="text-xl font-semibold tracking-tight">
-					<Link href="/">Clear Head</Link>
+		<header className="site-header">
+			<div className="container site-header-inner">
+				<h1 className="site-brand">
+					<Link href="/">
+						<span>Clear Head</span>
+					</Link>
 				</h1>
-				<nav className="flex items-center gap-2">
-					<Link className="rounded-lg px-3 py-2 text-sm" href="/dashboard">
+				<nav className="site-nav">
+					<Link className="site-nav-link" href="/dashboard">
 						Dashboard
 					</Link>
 
@@ -41,12 +43,12 @@ const Header = () => {
 					) : (
 						<>
 							<Link
-								className="rounded-lg px-3 py-2 text-sm"
+								className="site-nav-link site-nav-link-primary"
 								href="/auth/register"
 							>
 								Register
 							</Link>
-							<Link className="rounded-lg px-3 py-2 text-sm" href="/auth/login">
+							<Link className="site-nav-link" href="/auth/login">
 								Log in
 							</Link>
 						</>

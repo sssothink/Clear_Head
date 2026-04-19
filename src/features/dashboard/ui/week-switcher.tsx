@@ -3,11 +3,14 @@
 import { formatISODate, getStartOfWeek } from "@/shared/lib/date";
 import { addDays, addWeeks, format, isSameWeek, subWeeks } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function WeekSwitcher({ weekStart }: { weekStart: string }) {
 	const router = useRouter();
+	const pathname = usePathname();
+	const createWeekUrl = (date: Date) =>
+		`${pathname}?week=${formatISODate(date)}`;
 
 	const start = new Date(weekStart);
 	const end = addDays(start, 6);
@@ -16,9 +19,9 @@ export default function WeekSwitcher({ weekStart }: { weekStart: string }) {
 	const previousWeek = subWeeks(start, 1);
 	const nextWeek = addWeeks(start, 1);
 
-	const previousWeekUrl = `/dashboard?week=${formatISODate(previousWeek)}`;
-	const nextWeekUrl = `/dashboard?week=${formatISODate(nextWeek)}`;
-	const todayWeekUrl = `/dashboard?week=${formatISODate(todayWeekStart)}`;
+	const previousWeekUrl = createWeekUrl(previousWeek);
+	const nextWeekUrl = createWeekUrl(nextWeek);
+	const todayWeekUrl = createWeekUrl(todayWeekStart);
 
 	const isCurrentWeek = isSameWeek(start, new Date(), { weekStartsOn: 1 });
 

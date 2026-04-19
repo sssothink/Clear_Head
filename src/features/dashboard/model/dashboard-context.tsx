@@ -21,6 +21,8 @@ import { buildWeekEvents } from "@/lib/week/build-week-events";
 import { useDashboardUIState } from "./use-dashboard-ui-state";
 import { useDashboardInteractions } from "./use-dashboard-interactions";
 import type { SubmitResult } from "./use-dashboard-interactions";
+import { DashboardGoalState } from "./dashboard-goal-state";
+import { useDemoGoals } from "../demo/use-demo-goals";
 
 type ScheduleNotice = {
 	message: string;
@@ -37,6 +39,10 @@ export type DashboardContextType = {
 
 	scheduleNotice: ScheduleNotice | null;
 	clearScheduleNotice: () => void;
+
+	draggedEventId: string | null;
+	startEventDrag: (eventId: string) => void;
+	finishEventDrag: () => void;
 
 	onCellClick: (slot: SelectedSlot | null) => void;
 	onEdit: (id: string) => void;
@@ -94,14 +100,12 @@ export function useDashboard() {
 	return ctx;
 }
 
-export function DashboardProvider({
-	initialGoals,
-	initialOccurrences,
+function DashboardCoreProvider({
+	goalState,
 	weekStart,
 	children,
 }: {
-	initialGoals: Goal[];
-	initialOccurrences: GoalOccurrence[];
+	goalState: DashboardGoalState;
 	weekStart: string;
 	children: React.ReactNode;
 }) {
@@ -114,10 +118,12 @@ export function DashboardProvider({
 	const [scheduleNotice, setScheduleNotice] = useState<ScheduleNotice | null>(
 		null,
 	);
-	const scheduleNoticeHideTimeoutRef =
-		useRef<ReturnType<typeof setTimeout> | null>(null);
-	const scheduleNoticeClearTimeoutRef =
-		useRef<ReturnType<typeof setTimeout> | null>(null);
+	const scheduleNoticeHideTimeoutRef = useRef<ReturnType<
+		typeof setTimeout
+	> | null>(null);
+	const scheduleNoticeClearTimeoutRef = useRef<ReturnType<
+		typeof setTimeout
+	> | null>(null);
 
 	const clearScheduleNotice = useCallback(() => {
 		if (scheduleNoticeHideTimeoutRef.current) {
@@ -181,10 +187,16 @@ export function DashboardProvider({
 		onClose,
 	} = useDashboardUIState();
 
-	const baseEvents = useMemo(
-		() => buildWeekEvents(initialGoals, weekStart, initialOccurrences),
-		[initialGoals, weekStart, initialOccurrences],
-	);
+	const [isCollapsedManual, setIsCollapsedManual] = useState(true);
+	const [draggedEventId, setDraggedEventId] = useState<string | null>(null);
+
+	const startEventDrag = useCallback((eventId: string) => {
+		setDraggedEventId(eventId);
+	}, []);
+
+	const finishEventDrag = useCallback(() => {
+		setDraggedEventId(null);
+	}, []);
 
 	const {
 		events,
@@ -196,9 +208,7 @@ export function DashboardProvider({
 		detachOccurrence,
 		updateGoal,
 		updateGoalFromDate,
-	} = useOptimisticGoals(baseEvents, weekStart);
-
-	const [isCollapsedManual, setIsCollapsedManual] = useState(true);
+	} = goalState;
 
 	const hasEarlyTasks = events.some((event) => {
 		const [h, m] = event.start_time.split(":").map(Number);
@@ -236,6 +246,10 @@ export function DashboardProvider({
 			scheduleNotice,
 			clearScheduleNotice,
 
+			draggedEventId,
+			startEventDrag,
+			finishEventDrag,
+
 			onCellClick,
 			onEdit,
 			onSubmit,
@@ -263,6 +277,9 @@ export function DashboardProvider({
 			isPending,
 			selectedSlot,
 			editingEvent,
+			draggedEventId,
+			startEventDrag,
+			finishEventDrag,
 			onCellClick,
 			onEdit,
 			onSubmit,
@@ -289,5 +306,50 @@ export function DashboardProvider({
 		<DashboardContext.Provider value={value}>
 			{children}
 		</DashboardContext.Provider>
+	);
+}
+
+export function DashboardProvider({
+	initialGoals,
+	initialOccurrences,
+	weekStart,
+	children,
+}: {
+	initialGoals: Goal[];
+	initialOccurrences: GoalOccurrence[];
+	weekStart: string;
+	children: React.ReactNode;
+}) {
+	const baseEvents = useMemo(
+		() => buildWeekEvents(initialGoals, weekStart, initialOccurrences),
+		[initialGoals, weekStart, initialOccurrences],
+	);
+
+	const goalState = useOptimisticGoals(baseEvents, weekStart);
+
+	return (
+		<DashboardCoreProvider goalState={goalState} weekStart={weekStart}>
+			{children}
+		</DashboardCoreProvider>
+	);
+}
+
+export function DemoDashboardProvider({
+	initialGoals,
+	initialOccurrences,
+	weekStart,
+	children,
+}: {
+	initialGoals: Goal[];
+	initialOccurrences: GoalOccurrence[];
+	weekStart: string;
+	children: React.ReactNode;
+}) {
+	const goalState = useDemoGoals(initialGoals, initialOccurrences, weekStart);
+
+	return (
+		<DashboardCoreProvider goalState={goalState} weekStart={weekStart}>
+			{children}
+		</DashboardCoreProvider>
 	);
 }

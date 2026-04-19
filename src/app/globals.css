@@ -107,6 +107,337 @@ button:hover {
 	padding: 0 24px;
 }
 
+/* Header */
+
+.site-header {
+	position: sticky;
+	top: 0;
+	z-index: 180;
+	border-bottom: 1px solid color-mix(in srgb, var(--primary) 12%, var(--border));
+	background: rgba(20, 21, 24, 0.82);
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
+	box-shadow: 0 12px 34px rgba(0, 0, 0, 0.18);
+}
+
+.site-header-inner {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 18px;
+	min-height: 68px;
+}
+
+.site-brand {
+	flex-shrink: 0;
+	color: var(--text);
+	font-size: 18px;
+	font-weight: 850;
+	letter-spacing: 0;
+}
+
+.site-brand a {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	text-decoration: none;
+}
+
+.site-brand-mark {
+	display: inline-grid;
+	width: 32px;
+	height: 32px;
+	place-items: center;
+	border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+	border-radius: 10px;
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.04));
+	color: var(--text);
+	font-size: 14px;
+	font-weight: 900;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.site-nav {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.site-nav-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 36px;
+	padding: 0 12px;
+	border: 1px solid transparent;
+	border-radius: 10px;
+	background: transparent;
+	color: color-mix(in srgb, var(--text) 84%, var(--muted-foreground));
+	font-size: 13px;
+	font-weight: 800;
+	line-height: 1;
+	text-decoration: none;
+}
+
+.site-nav-link:hover {
+	border-color: color-mix(in srgb, var(--primary) 18%, var(--border));
+	background: rgba(255, 255, 255, 0.06);
+	color: var(--text);
+}
+
+.site-nav-link-primary {
+	border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
+	background: var(--primary);
+	color: var(--primary-foreground);
+}
+
+.site-nav-link-primary:hover {
+	border-color: var(--primary);
+	background: color-mix(in srgb, var(--primary) 88%, var(--text));
+	color: var(--primary-foreground);
+}
+
+@media (max-width: 560px) {
+	.site-header-inner {
+		align-items: flex-start;
+		flex-direction: column;
+		padding-top: 14px;
+		padding-bottom: 14px;
+	}
+
+	.site-nav {
+		width: 100%;
+		justify-content: flex-start;
+		flex-wrap: wrap;
+	}
+}
+
+/* Landing */
+
+.landing-shell {
+	min-height: calc(100vh - 64px);
+	background:
+		linear-gradient(180deg, rgba(41, 43, 46, 0.92) 0%, rgba(12, 13, 15, 1) 72%),
+		var(--background);
+}
+
+.landing-hero {
+	padding: 72px 0 42px;
+}
+
+.landing-hero-inner {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+	align-items: center;
+	gap: 48px;
+}
+
+.landing-copy {
+	max-width: 690px;
+}
+
+.landing-badge {
+	display: inline-flex;
+	align-items: center;
+	height: 28px;
+	padding: 0 10px;
+	border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.06);
+	color: color-mix(in srgb, var(--text) 82%, var(--muted-foreground));
+	font-size: 12px;
+	font-weight: 800;
+}
+
+.landing-copy h1 {
+	margin-top: 18px;
+	color: var(--text);
+	font-size: clamp(48px, 8vw, 86px);
+	font-weight: 800;
+	line-height: 0.94;
+	letter-spacing: 0;
+}
+
+.landing-lead {
+	margin-top: 22px;
+	max-width: 620px;
+	color: color-mix(in srgb, var(--text) 88%, var(--muted-foreground));
+	font-size: 22px;
+	line-height: 1.35;
+	font-weight: 650;
+}
+
+.landing-subcopy {
+	margin-top: 14px;
+	max-width: 620px;
+	color: var(--muted-foreground);
+	font-size: 15px;
+	line-height: 1.7;
+}
+
+.landing-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 28px;
+}
+
+.landing-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 42px;
+	padding: 0 16px;
+	border-radius: 10px;
+	font-size: 14px;
+	font-weight: 800;
+	text-decoration: none;
+}
+
+.landing-button-primary {
+	border: 1px solid var(--primary);
+	background: var(--primary);
+	color: var(--primary-foreground);
+}
+
+.landing-button-primary:hover {
+	background: color-mix(in srgb, var(--primary) 88%, var(--text));
+}
+
+.landing-button-secondary {
+	border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+	background: rgba(255, 255, 255, 0.04);
+	color: var(--text);
+}
+
+.landing-button-secondary:hover {
+	border-color: color-mix(in srgb, var(--primary) 34%, var(--border));
+	background: rgba(255, 255, 255, 0.08);
+}
+
+.landing-preview {
+	position: relative;
+	min-height: 420px;
+	overflow: hidden;
+	border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+	border-radius: 18px;
+	background:
+		linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+		linear-gradient(180deg, rgba(43, 45, 49, 0.96), rgba(23, 24, 27, 0.98));
+	background-size:
+		100% 52px,
+		33.333% 100%,
+		100% 100%;
+	box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+}
+
+.landing-preview-top {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	background: rgba(255, 255, 255, 0.045);
+}
+
+.landing-preview-top span {
+	padding: 14px;
+	color: color-mix(in srgb, var(--text) 78%, var(--muted-foreground));
+	font-size: 12px;
+	font-weight: 800;
+	text-align: center;
+}
+
+.landing-preview-grid {
+	position: relative;
+	min-height: 360px;
+}
+
+.landing-preview-task {
+	position: absolute;
+	border-radius: 10px;
+	border: 1px solid rgba(255, 255, 255, 0.22);
+	background: rgb(62, 103, 198);
+	color: var(--event-text);
+	padding: 10px;
+	font-size: 12px;
+	font-weight: 800;
+	box-shadow: 0 16px 34px rgba(0, 0, 0, 0.24);
+}
+
+.landing-preview-task-a {
+	top: 72px;
+	left: 8%;
+	width: 42%;
+	height: 104px;
+}
+
+.landing-preview-task-b {
+	top: 98px;
+	left: 52%;
+	width: 40%;
+	height: 74px;
+	background: rgb(82, 119, 204);
+}
+
+.landing-preview-task-c {
+	top: 244px;
+	left: 38%;
+	width: 45%;
+	height: 52px;
+	background: rgb(70, 91, 142);
+}
+
+.landing-section {
+	padding: 24px 0 76px;
+}
+
+.landing-feature-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 14px;
+}
+
+.landing-feature {
+	border: 1px solid color-mix(in srgb, var(--primary) 12%, var(--border));
+	border-radius: 14px;
+	background: rgba(255, 255, 255, 0.045);
+	padding: 20px;
+}
+
+.landing-feature h2 {
+	color: var(--text);
+	font-size: 16px;
+	font-weight: 800;
+	letter-spacing: 0;
+}
+
+.landing-feature p {
+	margin-top: 9px;
+	color: var(--muted-foreground);
+	font-size: 13px;
+	line-height: 1.65;
+}
+
+@media (max-width: 860px) {
+	.landing-hero {
+		padding-top: 46px;
+	}
+
+	.landing-hero-inner,
+	.landing-feature-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.landing-preview {
+		min-height: 320px;
+	}
+
+	.landing-preview-grid {
+		min-height: 260px;
+	}
+}
+
 /* Auth */
 
 .auth-shell {
@@ -1377,12 +1708,17 @@ select:focus {
 	box-shadow: 0 18px 44px rgba(0, 0, 0, 0.32);
 	opacity: 0;
 	animation: dragDeleteIn 0.16s ease-out forwards;
-	transition: all 0.2;
+	transition:
+		background-color 0.16s ease,
+		border-color 0.16s ease,
+		box-shadow 0.16s ease,
+		color 0.16s ease,
+		transform 0.16s ease;
 }
 
 .drag-delete-target--active {
-	width: 80px;
-	height: 80px;
+	width: 64px;
+	height: 64px;
 	transform: translateX(-50%) translateY(0) scale(1.08);
 	border-color: color-mix(in srgb, var(--destructive) 82%, var(--border));
 	background: color-mix(in srgb, var(--destructive) 28%, var(--popover));
@@ -1390,8 +1726,6 @@ select:focus {
 	box-shadow:
 		0 22px 54px rgba(0, 0, 0, 0.38),
 		0 0 0 8px color-mix(in srgb, var(--destructive) 16%, transparent);
-
-	transition: all 0.2;
 }
 
 @keyframes dragDeleteIn {
@@ -1433,4 +1767,25 @@ select:focus {
 .schedule-notice--visible {
 	opacity: 1;
 	transform: translate(-50%, -50%) scale(1);
+}
+
+.demo-reset-button {
+	position: fixed;
+	right: 20px;
+	bottom: 20px;
+	z-index: 240;
+	height: 36px;
+	padding: 0 12px;
+	border-radius: 10px;
+	border: 1px solid var(--border);
+	background: var(--card);
+	color: var(--text);
+	font-size: 12px;
+	font-weight: 800;
+	box-shadow: 0 14px 34px rgba(0, 0, 0, 0.26);
+}
+
+.demo-reset-button:hover {
+	border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+	background: var(--panel-subtle);
 }

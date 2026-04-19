@@ -13,11 +13,7 @@ const LogoutButton = () => {
 	};
 
 	return (
-		<button
-			onClick={handleLogout}
-			className="rounded-lg px-3 py-2 text-sm cursor-pointer"
-			type="button"
-		>
+		<button onClick={handleLogout} className="site-nav-link" type="button">
 			Log out
 		</button>
 	);

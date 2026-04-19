@@ -27,8 +27,10 @@ export default function WeekEventsOverlay() {
 		onEventResize,
 		onDelete,
 		onDeleteOccurrence,
+		draggedEventId,
+		startEventDrag,
+		finishEventDrag,
 	} = useDashboard();
-	const [draggedEventId, setDraggedEventId] = useState<string | null>(null);
 	const [isTrashOver, setIsTrashOver] = useState(false);
 	const isResizingRef = useRef(false);
 	const [resizePreview, setResizePreview] = useState<
@@ -115,11 +117,11 @@ export default function WeekEventsOverlay() {
 			});
 		}
 
-		setDraggedEventId(eventId);
+		startEventDrag(eventId);
 	};
 
 	const handleDragEnd = () => {
-		setDraggedEventId(null);
+		finishEventDrag();
 		setIsTrashOver(false);
 	};
 
@@ -145,7 +147,7 @@ export default function WeekEventsOverlay() {
 		const eventId = event.dataTransfer.getData("eventId") || draggedEventId;
 		const eventItem = events.find((item) => item.id === eventId);
 
-		setDraggedEventId(null);
+		finishEventDrag();
 		setIsTrashOver(false);
 
 		if (!eventItem) return;
