@@ -1,0 +1,137 @@
+"use client";
+
+import TimeGutter from "./time-gutter";
+import WeekGrid from "./week-grid";
+import WeekDaysHeader from "./week-days-header";
+import GoalEditorPopover from "./goal-editor-popover";
+import { Goal, GoalOccurrence } from "@/features/goals/model/types";
+import { DashboardProvider, useDashboard } from "../model";
+import { addDays } from "date-fns";
+import { formatISODate } from "@/shared/lib/date";
+import WeekSwitcher from "./week-switcher";
+
+export function DashboardContent() {
+	const {
+		weekStart,
+		selectedSlot,
+		editingEvent,
+		onSubmit,
+		onClose,
+		onDelete,
+		onDeleteOccurrence,
+		panelAnchor,
+		scheduleNotice,
+	} = useDashboard();
+
+	const isRecurring = editingEvent?.recurrence_type !== "none";
+
+	return (
+		<div className="min-h-screen bg-background px-4 py-5 text-foreground sm:px-6 sm:py-6">
+			<div className="w-full">
+				<div className="sticky top-3 z-100 mb-3 bg-background pb-1">
+					<div className="mb-3 flex items-center justify-end">
+						<WeekSwitcher weekStart={weekStart} />
+					</div>
+
+					<WeekDaysHeader />
+				</div>
+
+				<div className="overflow-visible rounded-3xl border border-border bg-card shadow-[0_18px_48px_rgba(0,0,0,0.24)]">
+					<div className="flex min-h-[calc(100vh-9rem)]">
+						<TimeGutter />
+						<WeekGrid />
+					</div>
+				</div>
+			</div>
+
+			{scheduleNotice && (
+				<div
+					className={`schedule-notice ${
+						scheduleNotice.visible ? "schedule-notice--visible" : ""
+					}`}
+					role="status"
+				>
+					{scheduleNotice.message}
+				</div>
+			)}
+
+			{(selectedSlot || editingEvent) && (
+				<GoalEditorPopover
+					key={
+						editingEvent
+							? `edit-${editingEvent.id}`
+							: `slot-${selectedSlot?.dayIndex}-${selectedSlot?.hourIndex}-${selectedSlot?.date}`
+					}
+					slot={selectedSlot ?? undefined}
+					onClose={onClose}
+					onSubmit={onSubmit}
+					panelAnchor={panelAnchor}
+					onDelete={
+						editingEvent
+							? isRecurring
+								? undefined
+								: () => {
+										onDelete(editingEvent.goal_id);
+										onClose();
+									}
+							: undefined
+					}
+					onDeleteOnly={
+						editingEvent && isRecurring
+							? () => {
+									onDeleteOccurrence(
+										editingEvent.goal_id,
+										editingEvent.occurrence_date,
+									);
+									onClose();
+								}
+							: undefined
+					}
+					onDeleteAll={
+						editingEvent && isRecurring
+							? () => {
+									onDelete(editingEvent.goal_id);
+									onClose();
+								}
+							: undefined
+					}
+					initialData={
+						editingEvent
+							? {
+									title: editingEvent.title,
+									description: editingEvent.description,
+									start_time: editingEvent.start_time,
+									end_time: editingEvent.end_time,
+									recurrence_type: editingEvent.recurrence_type,
+									recurrence_days: editingEvent.recurrence_days,
+									date: formatISODate(
+										addDays(new Date(weekStart), editingEvent.dayIndex),
+									),
+								}
+							: undefined
+					}
+				/>
+			)}
+		</div>
+	);
+}
+
+export default function DashboardScreen({
+	initialGoals,
+	initialOccurrences,
+	weekStart,
+}: {
+	initialGoals: Goal[];
+	initialOccurrences: GoalOccurrence[];
+	weekStart: string;
+}) {
+	return (
+		<DashboardProvider
+			initialGoals={initialGoals}
+			initialOccurrences={initialOccurrences}
+			weekStart={weekStart}
+		>
+			<DashboardContent />
+		</DashboardProvider>
+	);
+}
