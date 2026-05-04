@@ -1,36 +1,114 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Clear Head
+
+Clear Head is a weekly planner for tasks that need a clear place in the day. It
+combines a calendar-like dashboard with task editing, recurring routines,
+drag-and-drop planning, resizing, and optimistic updates.
+
+The project is built with Next.js, React, TypeScript, Supabase Auth, and
+Supabase Database.
+
+Deploy: https://clear-head-mmu0s9g1w-sssothinks-projects.vercel.app/
+
+## Features
+
+- Email/password authentication with Supabase Auth
+- Protected dashboard for registered users
+- Demo mode for trying the planner without an account
+- Weekly calendar view
+- Task creation, editing, completion, and deletion
+- Drag-and-drop task movement between days
+- Time block resizing
+- One-time, daily, and weekly recurring tasks
+- Per-occurrence edits and deletions for recurring tasks
+- Conflict-aware event layout
+- Optimistic UI updates for faster interactions
+
+## Tech Stack
+
+- Next.js App Router
+- React
+- TypeScript
+- Supabase Auth
+- Supabase Database
+- Zod
+- Tailwind CSS
+- Framer Motion
+- date-fns
 
 ## Getting Started
 
-First, run the development server:
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create a .env.local file in the project root:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Supabase Setup
 
-## Learn More
+The app expects Supabase Auth and database tables for goals and goal
+occurrences.
 
-To learn more about Next.js, take a look at the following resources:
+Required environment variables:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Recommended Auth settings:
 
-## Deploy on Vercel
+Enable email/password provider Enable email confirmation Configure password
+policy in Supabase Auth settings Keep Row Level Security enabled for user-owned
+data
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Main Routes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- / - landing page
+- /demo - local demo planner
+- /auth/register - account registration
+- /auth/login - login
+- /dashboard - authenticated planner dashboard
+
+## Available Scripts
+
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+```
+
+## Project Structure
+
+```bash
+src/
+  app/                  Next.js routes and pages
+  features/             Feature modules
+    dashboard/          Weekly planner UI and interactions
+    goals/              Goal actions, hooks, and types
+  lib/                  Supabase clients and server-side data access
+  shared/               Reusable UI and utility functions
+```
+
+## Notes
+
+Client-side validation is used for a better user experience. Data safety is
+handled by Supabase Auth settings, database constraints, and server-side
+ownership checks.
